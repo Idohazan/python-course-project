@@ -307,13 +307,12 @@ st.markdown(
 st.markdown(
     """
     <div class="etl-box">
-        <h3 style="margin-top: 0; color: #1f3bb3;">🔧 תהליך ה-ETL, הכנת הנתונים וניהול גרסאות</h3>
+        <h3 style="margin-top: 0; color: #1f3bb3;">🔧 תהליך ה-ETL והכנת הנתונים</h3>
         <ul style="line-height: 2;">
-            <li><strong>Extract:</strong> טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.</li>
+            <li><strong>Extract:</strong> טעינת נתוני מחירי דיור, ריבית ואירועים ממקורות הנתונים.</li>
             <li><strong>Transform:</strong> המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.</li>
-            <li><strong>Feature Engineering:</strong> יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.</li>
-            <li><strong>Version Control (Git):</strong> ניהול הקוד וגרסאות הפרויקט באמצעות Git ו-GitHub.</li>
-            <li><strong>Load & Analyze:</strong> יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.</li>
+            <li><strong>Feature Engineering:</strong> יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית וסימון אירועים.</li>
+            <li><strong>Load, Analyze & Version Control:</strong> הטמעת ה-Dataset בדאשבורד וניהול גרסאות הקוד ב-GitHub.</li>
         </ul>
     </div>
     """,
