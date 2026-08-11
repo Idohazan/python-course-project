@@ -308,17 +308,21 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- הצגת תהליך ה-ETL ממש מתחת לקופסת הפתיחה ומעל הלשוניות ---
-with st.container():
-    st.markdown("### 🔧 תהליך ה-ETL והכנת הנתונים")
-    st.markdown(
-        """
-        * **Extract:** טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.
-        * **Transform:** המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.
-        * **Feature Engineering:** יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.
-        * **Load & Analyze:** יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.
-        """
-    )
+# --- הצגת תהליך ה-ETL מיושר לימין ---
+st.markdown(
+    """
+    <div style="direction: rtl; text-align: right;">
+        <h3>🔧 תהליך ה-ETL והכנת הנתונים</h3>
+        <ul>
+            <li><strong>Extract:</strong> טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.</li>
+            <li><strong>Transform:</strong> המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.</li>
+            <li><strong>Feature Engineering:</strong> יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.</li>
+            <li><strong>Load & Analyze:</strong> יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.</li>
+        </ul>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.divider()
 
