@@ -717,7 +717,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 4 - EVENTS (Hebrew Months on X-Axis)
+# TAB 4 - EVENTS
 # ============================================================
 
 with tab_events:
@@ -848,30 +848,16 @@ with tab_events:
                 xanchor="center",
             )
 
-        # המרת שנתות ציר ה-X לחודשים ושנים בעברית
-        hebrew_months = {
-            1: "ינואר", 2: "פברואר", 3: "מרץ", 4: "אפריל",
-            5: "מאי", 6: "יוני", 7: "יולי", 8: "אוגוסט",
-            9: "ספטמבר", 10: "אוקטובר", 11: "נובמבר", 12: "דצמבר"
-        }
-        tick_vals = event_window["date"].tolist()
-        tick_texts = [f"{hebrew_months[d.month]} {d.year}" for d in event_window["date"]]
-
         fig.update_layout(
             height=500,
             hovermode="x unified",
-            xaxis=dict(
-                title="חודש",
-                tickvals=tick_vals,
-                ticktext=tick_texts,
-                tickangle=-45,
-            ),
+            xaxis_title="תאריך",
             yaxis_title="מדד מחירי דיור",
             margin=dict(
                 l=20,
                 r=20,
                 t=30,
-                b=50
+                b=20
             ),
         )
 
