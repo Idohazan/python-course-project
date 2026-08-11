@@ -718,7 +718,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 4 - EVENTS (Updated: Center aligned duration text)
+# TAB 4 - EVENTS (Fixed Center Aligned Duration Text)
 # ============================================================
 
 with tab_events:
@@ -818,13 +818,21 @@ with tab_events:
         )
 
         if event_date != event_end_date:
+            mid_date = event_date + (event_end_date - event_date) / 2
             fig.add_vrect(
                 x0=event_date,
                 x1=event_end_date,
                 fillcolor="red",
                 opacity=0.15,
-                annotation_text="משך האירוע",
-                annotation_position="top center",  # מיקום הכותרת באמצע
+                line_width=0,
+            )
+            fig.add_annotation(
+                x=mid_date,
+                y=event_window["index_value"].max(),
+                text="משך האירוע",
+                showarrow=False,
+                yshift=15,
+                xanchor="center",
             )
         else:
             fig.add_vline(
@@ -838,6 +846,7 @@ with tab_events:
                 text="האירוע",
                 showarrow=False,
                 yshift=15,
+                xanchor="center",
             )
 
         fig.update_layout(
