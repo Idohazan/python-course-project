@@ -3,64 +3,84 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# 1. הגדרות עמוד
-st.set_page_config(page_title="דאשבורד נדלן", layout="wide")
+# הגדרות עמוד
+st.set_page_config(page_title="נדל\"ן ומאקרו - ניתוח נתונים", layout="wide")
 
-# 2. CSS ליישור לימין
+# CSS לעיצוב יוקרתי
 st.markdown("""
     <style>
-    .stApp { direction: rtl; }
-    div[data-testid="stMarkdownContainer"] { text-align: right; }
+    .stApp { direction: rtl; font-family: sans-serif; }
+    h1 { color: #1f77b4; }
+    .css-1544g2n { padding: 2rem; }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. טעינת נתונים
+# טעינת נתונים
 @st.cache_data
 def load_data():
     return pd.read_csv('israel_housing_dashboard_data.csv')
 
 df = load_data()
 
-# 4. תפריט צד
-st.sidebar.title("מצגת פרויקט: שוק הדיור")
-slide = st.sidebar.radio("נווט:", [
-    "1. פתיח",
-    "2. ארכיטקטורת ה-ETL (מאחורי הקלעים)",
-    "3. ניתוח: מאקרו וריבית",
-    "4. תובנות ומסקנות"
-])
+# תפריט ניווט
+menu = ["הפתיח", "הדילמה הכלכלית", "מתודולוגיית ה-Pipeline", "שאלות מחקר", "תובנות מהשטח", "סיכום"]
+slide = st.sidebar.radio("ניווט במצגת", menu)
 
-# --- שקף 1: פתיח ---
-if slide == "1. פתיח":
-    st.title("מחירי הדיור בישראל: פרדוקסים ונתונים")
-    st.write('ברוכים הבאים למצגת שלי. נבחן כיצד הריבית, אירועי המאקרו ומדדי הנדל"ן נפגשים.')
-    st.image("https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800")
+# --- שקף 1: הפתיח ---
+if slide == "הפתיח":
+    st.title("בין ריבית לנדל\"ן: ניתוח המערכת הישראלית")
+    st.markdown("### פרויקט גמר: ניתוח התנהגות שוק הדיור תחת זעזועים מאקרו-כלכליים")
+    st.image("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200", use_column_width=True)
+    st.write("בחינה כמותית של הגורמים המניעים את שוק הנדל\"ן בישראל.")
 
-# --- שקף 2: ארכיטקטורת ה-ETL ---
-elif slide == "2. ארכיטקטורת ה-ETL (מאחורי הקלעים)":
-    st.title("תהליך הנתונים (Pipeline)")
-    
+# --- שקף 2: הדילמה הכלכלית ---
+elif slide == "הדילמה הכלכלית":
+    st.title("הפרדוקס הישראלי")
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("איך זה עובד?")
-        st.markdown("""
-        1. **Extract:** שליפה אוטומטית מ-API ממשלתי וקבצי CSV.
-        2. **Transform:** ניקוי, אגרגציה וחיבור (Merge) של 3 מקורות נתונים.
-        3. **Load:** שמירה ל-"Golden Table" מאוחדת ב-GitHub.
-        """)
+        st.subheader("שאלות הפתיחה")
+        st.markdown("- כיצד שוק הנדל\"ן מגיב לטלטלות ביטחוניות וחברתיות?")
+        st.markdown("- האם הריבית היא אכן הכלי האפקטיבי ביותר לריסון מחירי הדיור בישראל?")
+        st.markdown("- מהו הקשר בין המדיניות המוניטרית של בנק ישראל לבין התנהגות הקונים?")
     with col2:
-        st.info("💡 **ערך מוסף:** ביצעתי נירמול לערכי המדד (חלוקה ב-100), מה שמאפשר השוואה ויזואלית מדויקת מול עקומת הריבית.")
+        st.info("בניגוד לכלכלות מערביות קלאסיות, השוק הישראלי מפגין עמידות מול תנודות ריבית. הפרויקט בא לפצח למה.")
+
+# --- שקף 3: מתודולוגיית ה-Pipeline ---
+elif slide == "האופרציה הטכנית":
+    st.title("מתודולוגיית ה-Data Engineering")
+    st.write("בניתי תהליך ETL מורכב להפיכת דאטה גולמי לנכס אנליטי:")
     
-    st.code("df_final = df1.merge(df2).merge(df3)\ndf_final['index_value'] /= 100", language="python")
+    steps = {
+        "Extract": "שאיבת נתונים ממקורות הטרוגניים (ממשלתיים, כלכליים ואירועי מאקרו).",
+        "Transform": "ניקוי נתונים, סנכרון ציר זמן (Alignment) ו-Feature Engineering (נירמול מדדים לצורך השוואה).",
+        "Load": "יצירת 'Golden Table' מרוכזת, המהווה את מקור האמת של המערכת."
+    }
+    for step, desc in steps.items():
+        st.markdown(f"**{step}**: {desc}")
 
-# --- שקף 3: ניתוח ---
-elif slide == "3. ניתוח: מאקרו וריבית":
-    st.title("ניתוח נתונים")
-    fig = px.line(df, x='date', y=['index_value', 'interest_rate'], title="מדד מחירי הדיור מול הריבית")
-    st.plotly_chart(fig, use_container_width=True)
+# --- שקף 4: שאלות מחקר ---
+elif slide == "שאלות מחקר":
+    st.title("השאלות שמובילות את הניתוח")
+    st.markdown("1. האם קיימת קורלציה ישירה בין עליית הריבית לבין קצב עליית המחירים?")
+    st.markdown("2. זיהוי נקודות מפנה (Turning Points) סביב אירועים היסטוריים.")
+    st.markdown("3. הערכת עוצמת ההשפעה של מדיניות בנק ישראל אל מול 'כוחות השוק'.")
 
-# --- שקף 4: תובנות ---
-elif slide == "4. תובנות ומסקנות":
-    st.title("שורה תחתונה")
-    st.success("השוק הישראלי גילה עמידות גבוהה למרות העלאות ריבית חדות.")
-    st.write("הנתונים מראים שגורמים חיצוניים והיצע משפיעים לעיתים יותר מהריבית.")
+# --- שקף 5: ניתוח נתונים (גרפים) ---
+elif slide == "תובנות מהשטח":
+    st.title("ממצאים אנליטיים")
+    tab1, tab2 = st.tabs(["מבט מאקרו-משולב", "ניתוח תנודתיות"])
+    
+    with tab1:
+        fig = px.line(df, x='date', y=['index_value', 'interest_rate'], title="מדד הנדל\"ן מול הריבית (מנומל)")
+        st.plotly_chart(fig, use_column_width=True)
+        
+    with tab2:
+        st.write("ניתוח זה מראה כיצד אירועים ספציפיים משנים את כיוון המדד.")
+
+# --- שקף 6: סיכום ---
+elif slide == "סיכום":
+    st.title("מסקנות ומבט לעתיד")
+    st.success("הנדל\"ן בישראל מושפע מפרמטרים מורכבים מעבר לריבית בלבד.")
+    st.markdown("- **עמידות:** השוק מגיב באיטיות לשינויי ריבית.")
+    st.markdown("- **פסיכולוגיה:** אירועי מאקרו יוצרים 'רעש' שמשפיע על היקף העסקאות.")
+    st.balloons()
