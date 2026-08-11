@@ -470,7 +470,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 4 - EVENTS
+# TAB 4 - EVENTS (Hebrew Dates)
 # ============================================================
 
 with tab_events:
@@ -498,7 +498,27 @@ with tab_events:
             fig.add_vline(x=event_date, line_width=3, line_dash="dash")
             fig.add_annotation(x=event_date, y=event_window["index_value"].max(), text="האירוע", showarrow=False, yshift=15, xanchor="center")
 
-        fig.update_layout(height=500, xaxis_title="תאריך", yaxis_title="מדד מחירי דיור")
+        # הגדרת שמות חודשים בעברית לציר ה-X
+        hebrew_months = {
+            1: "ינואר", 2: "פברואר", 3: "מרץ", 4: "אפריל", 
+            5: "מאי", 6: "יוני", 7: "יולי", 8: "אוגוסט", 
+            9: "ספטמבר", 10: "אוקטובר", 11: "נובמבר", 12: "דצמבר"
+        }
+        
+        # שימוש בנקודות הקיימות ליצירת לייבלים בעברית
+        tick_vals = event_window["date"].tolist()
+        tick_texts = [f"{hebrew_months[d.month]} {d.year}" for d in event_window["date"]]
+
+        fig.update_layout(
+            height=500, 
+            xaxis=dict(
+                title="תאריך",
+                tickvals=tick_vals,
+                ticktext=tick_texts,
+                tickangle=-45
+            ),
+            yaxis_title="מדד מחירי דיור"
+        )
         st.plotly_chart(fig, use_container_width=True)
         
         # Calculate changes
