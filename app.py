@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL, Slider & Multiselect Tag Fixes)
+# CUSTOM CSS (RTL & Clean UI)
 # ============================================================
 
 st.markdown(
@@ -56,28 +56,18 @@ st.markdown(
         text-align: right;
     }
 
-    /* יישור תוויות של סליידרים, תיבות בחירה ותאריכים לימין */
-    label, .stSelectbox label, .stSlider label, .stDateInput label {
+    /* יישור תוויות של תיבות בחירה ותאריכים לימין */
+    label, .stSelectbox label, .stDateInput label {
         direction: rtl;
         text-align: right;
     }
 
-    /* תיקון מוחלט לסליידרים תחת RTL למניעת ניתוק בין הפס האדום לכפתור */
-    .stSlider {
-        direction: rtl !important;
-    }
-    .stSlider label {
-        text-align: right !important;
-        direction: rtl !important;
-    }
-    div[data-baseweb="slider"] {
-        direction: ltr !important;
-    }
-    div[data-baseweb="slider"] > div {
-        direction: ltr !important;
+    /* יישור לשוניות (Tabs) לימין */
+    .stTabs [data-baseweb="tab-list"] {
+        direction: rtl;
     }
 
-    /* תיקון והקטנת תגיות ה-Multiselect (Dropdown) כדי שלא יחתכו את הטקסט ויסתדרו יפה */
+    /* הקטנת תגיות ה-Multiselect */
     [data-baseweb="tag"] {
         font-size: 11px !important;
         padding: 1px 4px !important;
@@ -90,11 +80,6 @@ st.markdown(
     }
     [data-baseweb="tag"] span[role="button"] {
         transform: scale(0.7);
-    }
-
-    /* יישור לשוניות (Tabs) לימין */
-    .stTabs [data-baseweb="tab-list"] {
-        direction: rtl;
     }
 
     .hero-box {
@@ -336,7 +321,7 @@ selected_categories = st.sidebar.multiselect(
     default=categories,
 )
 
-# --- מסנן אירועים ספציפיים דינמי (מתעדכן לפי הקטגוריות שנבחרו) ---
+# --- מסנן אירועים ספציפיים דינמי ---
 df_events_only = df[df["is_event"]].copy()
 
 if selected_categories:
@@ -606,16 +591,15 @@ with tab_relationship:
         use_container_width=True
     )
 
-    # Lag analysis with dynamic red line updating based on the slider bar
+    # Lag analysis using selectbox (clean and bug-free under RTL)
     st.subheader(
         "⏱️ ניתוח השפעה בפיגור (Lag Analysis)"
     )
 
-    lag_months = st.slider(
-        "מספר חודשי פיגור",
-        min_value=1,
-        max_value=12,
-        value=6,
+    lag_months = st.selectbox(
+        "בחר מספר חודשי פיגור:",
+        options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        index=5 # ברירת מחדל 6 חודשים
     )
 
     lag_df = filtered[
@@ -631,7 +615,6 @@ with tab_relationship:
         .shift(lag_months)
     )
 
-    # Visual chart for lag analysis where the red line updates dynamically with the bar slider
     fig_lag = go.Figure()
 
     fig_lag.add_trace(
@@ -719,12 +702,10 @@ with tab_events:
 
         event_date = event_row["date"]
 
-        window = st.slider(
-            "חלון סביב האירוע (בחודשים)",
-            min_value=3,
-            max_value=24,
-            value=12,
-            step=3,
+        window = st.selectbox(
+            "בחר חלון סביב האירוע (בחודשים):",
+            options=[3, 6, 9, 12, 18, 24],
+            index=3 # ברירת מחדל 12 חודשים
         )
 
         st.markdown(
