@@ -428,23 +428,22 @@ events = filtered[
 
 
 # ============================================================
-# TABS
+# TABS (Updated without ETL tab)
 # ============================================================
 
-tab_overview, tab_questions, tab_relationship, tab_events, tab_conclusions, tab_etl = st.tabs(
+tab_overview, tab_questions, tab_relationship, tab_events, tab_conclusions = st.tabs(
     [
         "📊 סקירה",
         "🎯 שאלות עסקיות",
         "🏦 ריבית מול דיור",
         "⚡ אירועים",
         "💡 מסקנות ותובנות",
-        "🔧 ETL",
     ]
 )
 
 
 # ============================================================
-# TAB 1 - OVERVIEW
+# TAB 1 - OVERVIEW (Now containing ETL Expander at the bottom)
 # ============================================================
 
 with tab_overview:
@@ -587,6 +586,93 @@ with tab_overview:
         use_container_width=True
     )
 
+    st.divider()
+
+    # --- הוספת תיבה נפתחת (Expander) לתהליך ה-ETL בתחתית לשונית הסקירה ---
+    with st.expander("🔧 הצג את תהליך ה-ETL ונתונים מאחורי הקלעים"):
+        st.markdown(
+            """
+            ### שלבי התהליך
+
+            **1. Extract**
+            טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.
+
+            **2. Transform**
+            המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.
+
+            **3. Feature Engineering**
+            יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.
+
+            **4. Load & Analyze**
+            יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.
+            """
+        )
+
+        st.subheader(
+            "🔍 בדיקות איכות נתונים"
+        )
+
+        quality = {
+
+            "מספר רשומות":
+                len(df),
+
+            "מספר עמודות":
+                len(df.columns),
+
+            "טווח תאריכים":
+                (
+                    f"{df['date'].min().strftime('%m/%Y')}"
+                    f" – "
+                    f"{df['date'].max().strftime('%m/%Y')}"
+                ),
+
+            "ערכים חסרים":
+                int(
+                    df.isna()
+                    .sum()
+                    .sum()
+                ),
+
+            "רשומות אירועים":
+                int(
+                    df["is_event"]
+                    .sum()
+                ),
+
+            "כפילויות":
+                int(
+                    df.duplicated()
+                    .sum()
+                ),
+        }
+
+        qcols = st.columns(3)
+
+        for index, (
+            label,
+            value
+        ) in enumerate(
+            quality.items()
+        ):
+
+            with qcols[index % 3]:
+
+                st.metric(
+                    label,
+                    value
+                )
+
+        st.subheader(
+            "📋 Preview של הנתונים"
+        )
+
+        st.dataframe(
+            filtered.head(20),
+            use_container_width=True,
+            hide_index=True,
+        )
+
 
 # ============================================================
 # TAB 2 - BUSINESS QUESTIONS
@@ -617,21 +703,9 @@ with tab_questions:
         ### 📉 5. שינוי מגמה
         האם אירוע משמעותי יצר שינוי זמני או שינוי מתמשך במגמת השוק?
 
-        ### 🇮🇱 6. חוסן השוק
+        ### 6. חוסן השוק
         עד כמה שוק הדיור הישראלי חוזר למגמה לאחר זעזועים?
         """
-    )
-
-    st.subheader(
-        "📌 הערה מתודולוגית"
-    )
-
-    st.warning(
-        "הניתוח מתאר קשרים ודפוסים בנתונים "
-        "ואינו מהווה הוכחה לקשר סיבתי. "
-        "מחירי הדיור מושפעים מגורמים רבים נוספים "
-        "כגון היצע, ביקוש, אשראי, תעסוקה, "
-        "מדיניות ממשלתית וציפיות הציבור."
     )
 
 
@@ -718,7 +792,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 4 - EVENTS (Fixed Center Aligned Duration Text)
+# TAB 4 - EVENTS
 # ============================================================
 
 with tab_events:
@@ -971,104 +1045,6 @@ with tab_conclusions:
         </div>
         """,
         unsafe_allow_html=True
-    )
-
-
-# ============================================================
-# TAB 6 - ETL
-# ============================================================
-
-with tab_etl:
-
-    st.header(
-        "🔧 תהליך ETL ו-Data Preparation"
-    )
-
-    st.markdown(
-        """
-        ### שלבי התהליך
-
-        **1. Extract**
-
-        טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.
-
-        **2. Transform**
-
-        המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.
-
-        **3. Feature Engineering**
-
-        יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.
-
-        **4. Load & Analyze**
-
-        יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.
-        """
-    )
-
-    st.subheader(
-        "🔍 בדיקות איכות נתונים"
-    )
-
-    quality = {
-
-        "מספר רשומות":
-            len(df),
-
-        "מספר עמודות":
-            len(df.columns),
-
-        "טווח תאריכים":
-            (
-                f"{df['date'].min().strftime('%m/%Y')}"
-                f" – "
-                f"{df['date'].max().strftime('%m/%Y')}"
-            ),
-
-        "ערכים חסרים":
-            int(
-                df.isna()
-                .sum()
-                .sum()
-            ),
-
-        "רשומות אירועים":
-            int(
-                df["is_event"]
-                .sum()
-            ),
-
-        "כפילויות":
-            int(
-                df.duplicated()
-                .sum()
-            ),
-    }
-
-    qcols = st.columns(3)
-
-    for index, (
-        label,
-        value
-    ) in enumerate(
-        quality.items()
-    ):
-
-        with qcols[index % 3]:
-
-            st.metric(
-                label,
-                value
-            )
-
-    st.subheader(
-        "📋 Preview של הנתונים"
-    )
-
-    st.dataframe(
-        filtered.head(20),
-        use_container_width=True,
-        hide_index=True,
     )
 
 
