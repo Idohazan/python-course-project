@@ -18,19 +18,52 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS
+# CUSTOM CSS (RTL & Right Alignment)
 # ============================================================
 
 st.markdown(
     """
     <style>
 
+    /* הגדרת כל האפליקציה כמימין לשמאל וישור לימין */
+    .stApp {
+        direction: rtl;
+        text-align: right;
+    }
+
     .block-container {
         padding-top: 1.5rem;
         padding-bottom: 3rem;
+        direction: rtl;
+        text-align: right;
     }
 
     [data-testid="stSidebar"] {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* יישור כל כותרות הטקסט והפסקאות לימין */
+    div[data-testid="stMarkdownContainer"] {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* יישור קוביות מדדים (Metrics) לימין */
+    div[data-testid="stMetricLabel"],
+    div[data-testid="stMetricValue"] {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* יישור תוויות של סליידרים, תיבח בחירה ותאריכים לימין */
+    label, .stSelectbox label, .stSlider label, .stDateInput label {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* יישור לשוניות (Tabs) לימין */
+    .stTabs [data-baseweb="tab-list"] {
         direction: rtl;
     }
 
@@ -44,6 +77,8 @@ st.markdown(
         );
         border: 1px solid #dbe7f7;
         margin-bottom: 1.5rem;
+        direction: rtl;
+        text-align: right;
     }
 
     .metric-box {
@@ -52,6 +87,8 @@ st.markdown(
         border: 1px solid #e5e7eb;
         background: #ffffff;
         min-height: 120px;
+        direction: rtl;
+        text-align: right;
     }
 
     </style>
