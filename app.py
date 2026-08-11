@@ -470,7 +470,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 4 - EVENTS (Hebrew Dates)
+# TAB 4 - EVENTS (Hebrew Dates - Spaced)
 # ============================================================
 
 with tab_events:
@@ -498,16 +498,17 @@ with tab_events:
             fig.add_vline(x=event_date, line_width=3, line_dash="dash")
             fig.add_annotation(x=event_date, y=event_window["index_value"].max(), text="האירוע", showarrow=False, yshift=15, xanchor="center")
 
-        # הגדרת שמות חודשים בעברית לציר ה-X
+        # הגדרת שמות חודשים בעברית עם ריווח חכם
         hebrew_months = {
             1: "ינואר", 2: "פברואר", 3: "מרץ", 4: "אפריל", 
             5: "מאי", 6: "יוני", 7: "יולי", 8: "אוגוסט", 
             9: "ספטמבר", 10: "אוקטובר", 11: "נובמבר", 12: "דצמבר"
         }
         
-        # שימוש בנקודות הקיימות ליצירת לייבלים בעברית
-        tick_vals = event_window["date"].tolist()
-        tick_texts = [f"{hebrew_months[d.month]} {d.year}" for d in event_window["date"]]
+        # בחירת מרווח שנתות מרווח (למשל כל 3 נקודות) כדי לא לעמוס
+        step = max(1, len(event_window) // 6)
+        tick_vals = event_window["date"].iloc[::step].tolist()
+        tick_texts = [f"{hebrew_months[d.month]} {d.year}" for d in event_window["date"].iloc[::step]]
 
         fig.update_layout(
             height=500, 
