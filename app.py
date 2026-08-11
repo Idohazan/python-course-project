@@ -636,7 +636,7 @@ with tab_questions:
 
 
 # ============================================================
-# TAB 3 - INTEREST RATE
+# TAB 3 - INTEREST RATE (Updated without Lag Analysis)
 # ============================================================
 
 with tab_relationship:
@@ -651,7 +651,7 @@ with tab_relationship:
 
         **1.** כיצד השתנו מחירי הדיור בתקופות של עליית ריבית?
 
-        **2.** האם קיימת תגובה בפיגור של שוק הדיור לשינויי ריבית?
+        **2.** האם קיימת תגובה של שוק הדיור לשינויי ריבית?
         """
     )
 
@@ -713,72 +713,6 @@ with tab_relationship:
 
     st.plotly_chart(
         fig,
-        use_container_width=True
-    )
-
-    # Lag analysis using selectbox
-    st.subheader(
-        "⏱️ ניתוח השפעה בפיגור (Lag Analysis)"
-    )
-
-    lag_months = st.selectbox(
-        "בחר מספר חודשי פיגור:",
-        options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        index=5
-    )
-
-    lag_df = filtered[
-        [
-            "date",
-            "interest_rate",
-            "index_value"
-        ]
-    ].dropna().copy()
-
-    lag_df["rate_lagged"] = (
-        lag_df["interest_rate"]
-        .shift(lag_months)
-    )
-
-    fig_lag = go.Figure()
-
-    fig_lag.add_trace(
-        go.Scatter(
-            x=lag_df["date"],
-            y=lag_df["index_value"],
-            name="מדד מחירי הדיור",
-            mode="lines",
-            line=dict(width=2, color="blue"),
-            yaxis="y1",
-        )
-    )
-
-    fig_lag.add_trace(
-        go.Scatter(
-            x=lag_df["date"],
-            y=lag_df["rate_lagged"],
-            name=f"ריבית בפיגור של {lag_months} חודשים",
-            mode="lines",
-            line=dict(width=2, color="red", dash="dot"),
-            yaxis="y2",
-        )
-    )
-
-    fig_lag.update_layout(
-        height=450,
-        hovermode="x unified",
-        yaxis=dict(title="מדד מחירי דיור"),
-        yaxis2=dict(
-            title="ריבית בפיגור (%)",
-            overlaying="y",
-            side="right",
-        ),
-        margin=dict(l=20, r=80, t=30, b=20),
-        legend=dict(orientation="h", y=1.08, x=1, xanchor="right"),
-    )
-
-    st.plotly_chart(
-        fig_lag,
         use_container_width=True
     )
 
@@ -1059,7 +993,7 @@ with tab_etl:
 
         **4. Load & Analyze**
 
-        israel_housing_dashboard_data.csv המשמש את Pandas ואת ה-Dashboard.
+        יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.
         """
     )
 
