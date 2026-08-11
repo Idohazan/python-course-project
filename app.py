@@ -4,8 +4,9 @@ import numpy as np
 import plotly.graph_objects as go
 from pathlib import Path
 
+
 # ============================================================
-# Israel Housing Market Dashboard
+# PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
@@ -15,65 +16,63 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
 # ============================================================
-# Styling / RTL
+# CUSTOM CSS
 # ============================================================
 
 st.markdown(
     """
     <style>
+
     .block-container {
         padding-top: 1.5rem;
         padding-bottom: 3rem;
-        direction: rtl;
     }
 
     [data-testid="stSidebar"] {
         direction: rtl;
     }
 
-    .hero {
-        padding: 1.5rem 1.8rem;
+    .hero-box {
+        padding: 1.5rem;
         border-radius: 18px;
-        background: linear-gradient(135deg, #eef4ff 0%, #f8fbff 100%);
+        background: linear-gradient(
+            135deg,
+            #eef4ff 0%,
+            #f8fbff 100%
+        );
         border: 1px solid #dbe7f7;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 
-    .hero h1 {
-        margin-bottom: 0.3rem;
-        font-size: 2.35rem;
-    }
-
-    .hero p {
-        font-size: 1.08rem;
-        color: #4b5563;
-        margin-bottom: 0;
-    }
-
-    .question {
-        padding: 1rem 1.2rem;
+    .metric-box {
+        padding: 1rem;
         border-radius: 14px;
         border: 1px solid #e5e7eb;
         background: #ffffff;
         min-height: 120px;
     }
 
-    .question h4 {
-        margin-top: 0;
-        margin-bottom: .45rem;
-    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
+
 # ============================================================
-# Data Loading
+# DATA FILE
 # ============================================================
 
-DATA_FILE = Path(__file__).parent / "israel_housing_dashboard_data.csv"
+DATA_FILE = (
+    Path(__file__).parent
+    / "israel_housing_dashboard_data.csv"
+)
 
+
+# ============================================================
+# LOAD DATA
+# ============================================================
 
 @st.cache_data
 def load_data(path: str) -> pd.DataFrame:
@@ -92,7 +91,8 @@ def load_data(path: str) -> pd.DataFrame:
     ]
 
     missing_columns = [
-        column for column in required_columns
+        column
+        for column in required_columns
         if column not in data.columns
     ]
 
@@ -117,6 +117,7 @@ def load_data(path: str) -> pd.DataFrame:
     ]
 
     for column in numeric_columns:
+
         data[column] = pd.to_numeric(
             data[column],
             errors="coerce"
@@ -128,25 +129,31 @@ def load_data(path: str) -> pd.DataFrame:
     )
 
     # Sort chronologically
-    data = data.sort_values(
-        "date"
-    ).reset_index(drop=True)
+    data = (
+        data
+        .sort_values("date")
+        .reset_index(drop=True)
+    )
 
     # ========================================================
-    # Feature Engineering
+    # FEATURE ENGINEERING
     # ========================================================
 
     data["year"] = data["date"].dt.year
+
     data["month"] = data["date"].dt.month
 
-    # 12-month change in housing index
+    # 12-month change
     data["index_change_12m"] = (
-        data["index_value"].pct_change(12) * 100
+        data["index_value"]
+        .pct_change(12)
+        * 100
     )
 
-    # Monthly interest rate change
+    # Interest rate monthly change
     data["rate_change"] = (
-        data["interest_rate"].diff()
+        data["interest_rate"]
+        .diff()
     )
 
     # Event flag
@@ -158,7 +165,7 @@ def load_data(path: str) -> pd.DataFrame:
 
 
 # ============================================================
-# Load Dataset
+# LOAD DATASET
 # ============================================================
 
 try:
@@ -174,7 +181,8 @@ except Exception as e:
     )
 
     st.info(
-        "ודא שהקובץ israel_housing_dashboard_data.csv "
+        "ודא שהקובץ "
+        "israel_housing_dashboard_data.csv "
         "נמצא באותה תיקייה של app.py."
     )
 
@@ -182,37 +190,42 @@ except Exception as e:
 
 
 # ============================================================
-# Header
+# MAIN HEADER
 # ============================================================
+
+st.title(
+    "🇮🇱 שוק הדיור בישראל תחת לחץ"
+)
 
 st.markdown(
     """
-    <div class="hero">
+    ### כיצד ריבית, אירועים לאומיים ותנאי השוק
+    משפיעים על מחירי הדיור בישראל?
 
-        <h1>
-            🇮🇱 שוק הדיור בישראל תחת לחץ
-        </h1>
-
-        <p>
-            ניתוח הקשר בין מחירי הדיור, ריבית בנק ישראל
-            ואירועים משמעותיים לאורך זמן —
-            באמצעות ETL, Pandas ו-Streamlit.
-        </p>
-
-    </div>
-    """,
-    unsafe_allow_html=True,
+    **ETL · Pandas · Data Analysis · Streamlit**
+    """
 )
+
+st.divider()
 
 
 # ============================================================
-# Sidebar
+# SIDEBAR
 # ============================================================
 
 st.sidebar.title("🎛️ מסננים")
 
-min_date = df["date"].min().date()
-max_date = df["date"].max().date()
+min_date = (
+    df["date"]
+    .min()
+    .date()
+)
+
+max_date = (
+    df["date"]
+    .max()
+    .date()
+)
 
 date_range = st.sidebar.date_input(
     "טווח תאריכים",
@@ -221,7 +234,10 @@ date_range = st.sidebar.date_input(
     max_value=max_date,
 )
 
-if isinstance(date_range, tuple) and len(date_range) == 2:
+if (
+    isinstance(date_range, tuple)
+    and len(date_range) == 2
+):
 
     start_date = pd.Timestamp(
         date_range[0]
@@ -256,6 +272,10 @@ selected_categories = st.sidebar.multiselect(
 )
 
 
+# ============================================================
+# FILTER DATA
+# ============================================================
+
 filtered = df[
     (df["date"] >= start_date)
     &
@@ -268,7 +288,10 @@ if selected_categories:
     filtered = filtered[
         (~filtered["is_event"])
         |
-        (filtered["category"].isin(selected_categories))
+        (
+            filtered["category"]
+            .isin(selected_categories)
+        )
     ]
 
 
@@ -286,7 +309,7 @@ st.sidebar.caption(
 
 
 # ============================================================
-# Tabs
+# TABS
 # ============================================================
 
 tab_overview, tab_relationship, tab_events, tab_questions, tab_etl = st.tabs(
@@ -301,23 +324,22 @@ tab_overview, tab_relationship, tab_events, tab_questions, tab_etl = st.tabs(
 
 
 # ============================================================
-# TAB 1 - Overview
+# TAB 1 - OVERVIEW
 # ============================================================
 
 with tab_overview:
 
-    latest = (
-        filtered
-        .dropna(subset=["index_value"])
-        .sort_values("date")
-        .iloc[-1]
+    st.header(
+        "📊 תמונת מצב"
     )
 
-    first = (
+    latest = (
         filtered
-        .dropna(subset=["index_value"])
+        .dropna(
+            subset=["index_value"]
+        )
         .sort_values("date")
-        .iloc[0]
+        .iloc[-1]
     )
 
     c1, c2, c3, c4 = st.columns(4)
@@ -346,12 +368,12 @@ with tab_overview:
     with c4:
 
         st.metric(
-            "אירועים בטווח הנבחר",
-            f"{len(events)}"
+            "מספר אירועים",
+            len(events)
         )
 
     st.subheader(
-        "📈 התפתחות שוק הדיור לאורך זמן"
+        "📈 התפתחות מחירי הדיור לאורך זמן"
     )
 
     fig = go.Figure()
@@ -370,7 +392,7 @@ with tab_overview:
         )
     )
 
-    # Mark events
+    # Event markers
     for _, row in events.iterrows():
 
         fig.add_vline(
@@ -423,48 +445,24 @@ with tab_overview:
 
 
 # ============================================================
-# TAB 2 - Interest Rate vs Housing
+# TAB 2 - INTEREST RATE
 # ============================================================
 
 with tab_relationship:
 
-    st.subheader(
-        "🏦 האם הריבית קשורה להתנהגות מחירי הדיור?"
+    st.header(
+        "🏦 ריבית בנק ישראל מול שוק הדיור"
     )
 
-    c1, c2 = st.columns(2)
+    st.markdown(
+        """
+        ### השאלות המרכזיות
 
-    with c1:
+        **1.** כיצד השתנו מחירי הדיור בתקופות של עליית ריבית?
 
-        st.markdown(
-            """
-            <div class="question">
-
-                <h4>שאלה</h4>
-
-                כיצד השתנו מחירי הדיור
-                בתקופות של עליית ריבית?
-
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    with c2:
-
-        st.markdown(
-            """
-            <div class="question">
-
-                <h4>שאלה נוספת</h4>
-
-                האם קיימת תגובה בפיגור
-                של שוק הדיור לשינויי ריבית?
-
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        **2.** האם קיימת תגובה בפיגור של שוק הדיור לשינויי ריבית?
+        """
+    )
 
     fig = go.Figure()
 
@@ -545,20 +543,19 @@ with tab_relationship:
         )
 
         st.metric(
-            "מתאם Pearson בין המדדים",
+            "מתאם Pearson",
             f"{corr:.2f}"
         )
 
         st.caption(
             "⚠️ מתאם אינו מוכיח סיבתיות. "
-            "הקשר עשוי להיות מושפע ממגמות משותפות "
-            "ומגורמים נוספים."
+            "הקשר עשוי להיות מושפע מגורמים נוספים."
         )
 
     # Lag analysis
 
     st.subheader(
-        "⏱️ בדיקת תגובה בפיגור"
+        "⏱️ האם קיימת השפעה בפיגור?"
     )
 
     lag_months = st.slider(
@@ -588,42 +585,55 @@ with tab_relationship:
     )
 
     st.metric(
-        f"מתאם: ריבית בפיגור של {lag_months} חודשים",
-        f"{lag_corr:.2f}"
-        if pd.notna(lag_corr)
-        else "N/A"
+        f"מתאם עם ריבית בפיגור של {lag_months} חודשים",
+        (
+            f"{lag_corr:.2f}"
+            if pd.notna(lag_corr)
+            else "N/A"
+        )
     )
 
 
 # ============================================================
-# TAB 3 - Events
+# TAB 3 - EVENTS
 # ============================================================
 
 with tab_events:
 
-    st.subheader(
-        "⚡ כיצד שוק הדיור מגיב לאירועים?"
+    st.header(
+        "⚡ תגובת שוק הדיור לאירועים"
+    )
+
+    st.markdown(
+        """
+        ### האם אירועים משמעותיים משנים את מגמת השוק?
+
+        בחר אירוע ובדוק את התנהגות מדד מחירי הדיור
+        לפני ואחרי האירוע.
+        """
     )
 
     if events.empty:
 
         st.warning(
-            "לא נמצאו אירועים בטווח ובמסננים שנבחרו."
+            "לא נמצאו אירועים בטווח שנבחר."
         )
 
     else:
 
-        event_options = events[
-            "event_name"
-        ].tolist()
+        event_options = (
+            events["event_name"]
+            .tolist()
+        )
 
         selected_event = st.selectbox(
-            "בחר אירוע לניתוח",
+            "בחר אירוע",
             event_options
         )
 
         event_row = events[
-            events["event_name"] == selected_event
+            events["event_name"]
+            == selected_event
         ].iloc[0]
 
         event_date = event_row["date"]
@@ -636,25 +646,35 @@ with tab_events:
             step=3,
         )
 
-        event_window = df[
-            (df["date"] >=
-             event_date - pd.DateOffset(months=window))
-            &
-            (df["date"] <=
-             event_date + pd.DateOffset(months=window))
-        ].copy()
-
         st.markdown(
             f"""
-            **{selected_event}**
+            **אירוע:** {selected_event}
 
-            תאריך: **{event_date.strftime('%m/%Y')}**
+            **תאריך:** {event_date.strftime('%m/%Y')}
 
-            קטגוריה: **{event_row['category']}**
+            **קטגוריה:** {event_row['category']}
 
-            עוצמת אירוע: **{event_row['impact']:.0f}/5**
+            **עוצמת אירוע:** {event_row['impact']:.0f}/5
             """
         )
+
+        event_window = df[
+            (
+                df["date"]
+                >= event_date
+                - pd.DateOffset(
+                    months=window
+                )
+            )
+            &
+            (
+                df["date"]
+                <= event_date
+                + pd.DateOffset(
+                    months=window
+                )
+            )
+        ].copy()
 
         fig = go.Figure()
 
@@ -708,9 +728,11 @@ with tab_events:
             (df["date"] < event_date)
             &
             (
-                df["date"] >=
-                event_date -
-                pd.DateOffset(months=window)
+                df["date"]
+                >= event_date
+                - pd.DateOffset(
+                    months=window
+                )
             )
         ]["index_value"].dropna()
 
@@ -718,45 +740,61 @@ with tab_events:
             (df["date"] > event_date)
             &
             (
-                df["date"] <=
-                event_date +
-                pd.DateOffset(months=window)
+                df["date"]
+                <= event_date
+                + pd.DateOffset(
+                    months=window
+                )
             )
         ]["index_value"].dropna()
 
         if len(before) and len(after):
 
-            b1, b2, b3 = st.columns(3)
-
             before_change = (
-                (before.iloc[-1] /
-                 before.iloc[0]) - 1
+                (
+                    before.iloc[-1]
+                    /
+                    before.iloc[0]
+                )
+                - 1
             ) * 100
 
             after_change = (
-                (after.iloc[-1] /
-                 after.iloc[0]) - 1
+                (
+                    after.iloc[-1]
+                    /
+                    after.iloc[0]
+                )
+                - 1
             ) * 100
 
             difference = (
-                after_change -
-                before_change
+                after_change
+                - before_change
             )
 
-            b1.metric(
-                "שינוי בתקופה שלפני",
-                f"{before_change:.1f}%"
-            )
+            b1, b2, b3 = st.columns(3)
 
-            b2.metric(
-                "שינוי בתקופה שאחרי",
-                f"{after_change:.1f}%"
-            )
+            with b1:
 
-            b3.metric(
-                "הפרש בין התקופות",
-                f"{difference:+.1f}%"
-            )
+                st.metric(
+                    "שינוי בתקופה שלפני",
+                    f"{before_change:.1f}%"
+                )
+
+            with b2:
+
+                st.metric(
+                    "שינוי בתקופה שאחרי",
+                    f"{after_change:.1f}%"
+                )
+
+            with b3:
+
+                st.metric(
+                    "הפרש בין התקופות",
+                    f"{difference:+.1f}%"
+                )
 
         st.subheader(
             "📋 אירועים בטווח הנבחר"
@@ -789,82 +827,42 @@ with tab_events:
 
 
 # ============================================================
-# TAB 4 - Business Questions
+# TAB 4 - BUSINESS QUESTIONS
 # ============================================================
 
 with tab_questions:
 
-    st.subheader(
-        "🎯 שאלות עסקיות"
+    st.header(
+        "🎯 השאלות העסקיות"
     )
 
-    questions = [
+    st.markdown(
+        """
+        הפרויקט נבנה סביב מספר שאלות מרכזיות:
 
-        (
-            "🏠 מגמת מחירי הדיור",
-            "כיצד התפתחו מחירי הדיור בישראל לאורך התקופה?"
-        ),
+        ### 🏠 1. מגמת מחירי הדיור
+        כיצד התפתחו מחירי הדיור בישראל לאורך התקופה?
 
-        (
-            "🏦 השפעת הריבית",
-            "האם קיימת התאמה בין ריבית בנק ישראל לבין התנהגות מחירי הדיור?"
-        ),
+        ### 🏦 2. השפעת הריבית
+        האם קיימת התאמה בין ריבית בנק ישראל
+        לבין התנהגות מחירי הדיור?
 
-        (
-            "⏱️ תגובה בפיגור",
-            "האם שינויי ריבית משפיעים על שוק הדיור באופן מיידי או בפיגור?"
-        ),
+        ### ⏱️ 3. תגובה בפיגור
+        האם שינויי ריבית משפיעים על שוק הדיור
+        באופן מיידי או בפיגור?
 
-        (
-            "⚡ אירועים חריגים",
-            "כיצד הגיב שוק הדיור לאירועים לאומיים משמעותיים?"
-        ),
+        ### ⚡ 4. אירועים חריגים
+        כיצד הגיב שוק הדיור לאירועים לאומיים משמעותיים?
 
-        (
-            "📉 שינוי מגמה",
-            "האם אירוע משמעותי יצר שינוי זמני או שינוי מתמשך במגמת השוק?"
-        ),
+        ### 📉 5. שינוי מגמה
+        האם אירוע משמעותי יצר שינוי זמני
+        או שינוי מתמשך במגמת השוק?
 
-        (
-            "🇮🇱 חוסן השוק",
-            "עד כמה שוק הדיור הישראלי חוזר למגמה לאחר זעזועים?"
-        ),
-
-    ]
-
-    for i in range(
-        0,
-        len(questions),
-        2
-    ):
-
-        cols = st.columns(2)
-
-        for col, (title, question) in zip(
-            cols,
-            questions[i:i + 2]
-        ):
-
-            with col:
-
-                st.markdown(
-                    f"""
-                    <div class="question">
-
-                        <h4>
-                            {title}
-                        </h4>
-
-                        <div>
-                            {question}
-                        </div>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-        st.write("")
+        ### 🇮🇱 6. חוסן השוק
+        עד כמה שוק הדיור הישראלי חוזר למגמה
+        לאחר זעזועים?
+        """
+    )
 
     st.subheader(
         "📌 הערה מתודולוגית"
@@ -885,69 +883,35 @@ with tab_questions:
 
 with tab_etl:
 
-    st.subheader(
+    st.header(
         "🔧 תהליך ETL ו-Data Preparation"
     )
 
-    etl_cols = st.columns(4)
+    st.markdown(
+        """
+        ### שלבי התהליך
 
-    steps = [
+        **1. Extract**
 
-        (
-            "1",
-            "Extract",
-            "טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים."
-        ),
+        טעינת נתוני מחירי דיור, ריבית ואירועים
+        ממקור הנתונים.
 
-        (
-            "2",
-            "Transform",
-            "המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה."
-        ),
+        **2. Transform**
 
-        (
-            "3",
-            "Feature Engineering",
-            "יצירת שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים."
-        ),
+        המרת תאריכים, טיפול בסוגי נתונים,
+        ניקוי, מיון וסטנדרטיזציה.
 
-        (
-            "4",
-            "Load & Analyze",
-            "יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard."
-        ),
+        **3. Feature Engineering**
 
-    ]
+        יצירת מדדים חדשים כגון שינוי שנתי,
+        שינויי ריבית, משתני זמן וסימון אירועים.
 
-    for col, (
-        num,
-        title,
-        description
-    ) in zip(
-        etl_cols,
-        steps
-    ):
+        **4. Load & Analyze**
 
-        with col:
-
-            st.markdown(
-                f"""
-                <div class="question">
-
-                    <h4>
-                        {num}. {title}
-                    </h4>
-
-                    <div>
-                        {description}
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    st.write("")
+        יצירת Dataset אנליטי אחיד המשמש
+        את Pandas ואת ה-Dashboard.
+        """
+    )
 
     st.subheader(
         "🔍 בדיקות איכות נתונים"
@@ -969,13 +933,23 @@ with tab_etl:
             ),
 
         "ערכים חסרים":
-            int(df.isna().sum().sum()),
+            int(
+                df.isna()
+                .sum()
+                .sum()
+            ),
 
         "רשומות אירועים":
-            int(df["is_event"].sum()),
+            int(
+                df["is_event"]
+                .sum()
+            ),
 
         "כפילויות":
-            int(df.duplicated().sum()),
+            int(
+                df.duplicated()
+                .sum()
+            ),
     }
 
     qcols = st.columns(3)
@@ -1006,7 +980,7 @@ with tab_etl:
 
 
 # ============================================================
-# Footer
+# FOOTER
 # ============================================================
 
 st.divider()
