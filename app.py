@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL, Multiselect Box Expansion & Clean UI)
+# CUSTOM CSS (RTL, Metrics Fix & Clean UI)
 # ============================================================
 
 st.markdown(
@@ -49,11 +49,18 @@ st.markdown(
         text-align: right;
     }
 
-    /* יישור קוביות מדדים (Metrics) לימין */
+    /* תיקון מוחלט לתצוגת המדדים (Metrics) בעברית למניעת היפוך טקסט */
+    div[data-testid="stMetric"],
     div[data-testid="stMetricLabel"],
     div[data-testid="stMetricValue"] {
-        direction: rtl;
-        text-align: right;
+        direction: rtl !important;
+        text-align: right !important;
+        unicode-bidi: plaintext !important;
+    }
+
+    div[data-testid="stMetricLabel"] label {
+        direction: rtl !important;
+        text-align: right !important;
     }
 
     /* יישור תוויות של תיבות בחירה ותאריכים לימין */
@@ -396,7 +403,7 @@ events = filtered[
 
 
 # ============================================================
-# TABS (סדר לשוניות מעודכן)
+# TABS
 # ============================================================
 
 tab_overview, tab_questions, tab_relationship, tab_events, tab_conclusions, tab_etl = st.tabs(
@@ -482,12 +489,15 @@ with tab_overview:
         )
     )
 
-    # Event markers or duration spans in overview
-    for _, row in events.iterrows():
+    # Event markers or duration spans in overview with staggered heights to prevent overlapping
+    for i, (_, row) in enumerate(events.iterrows()):
         start_d = row["date"]
         end_d = row.get("end_date", start_d)
         if pd.isna(end_d) or end_d < start_d:
             end_d = start_d
+
+        # פיזור אוטומטי של גובה ההתוויה לפי האינדקס למניעת חפיפה
+        ay_offset = -35 - (i % 3) * 28
 
         if start_d != end_d:
             fig.add_vrect(
@@ -504,7 +514,7 @@ with tab_overview:
                 y=filtered["index_value"].max(),
                 text=row["event_name"],
                 showarrow=False,
-                yshift=10,
+                yshift=10 + (i % 3) * 12,
                 font=dict(size=9, color="darkred"),
             )
         else:
@@ -521,8 +531,8 @@ with tab_overview:
                 showarrow=True,
                 arrowhead=1,
                 ax=0,
-                ay=-35,
-                font=dict(size=10),
+                ay=ay_offset,
+                font=dict(size=9),
             )
 
     fig.update_layout(
@@ -684,7 +694,7 @@ with tab_relationship:
         use_container_width=True
     )
 
-    # Lag analysis using selectbox (clean and bug-free under RTL)
+    # Lag analysis using selectbox
     st.subheader(
         "⏱️ ניתוח השפעה בפיגור (Lag Analysis)"
     )
@@ -692,7 +702,7 @@ with tab_relationship:
     lag_months = st.selectbox(
         "בחר מספר חודשי פיגור:",
         options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        index=5 # ברירת מחדל 6 חודשים
+        index=5
     )
 
     lag_df = filtered[
@@ -801,10 +811,9 @@ with tab_events:
         window = st.selectbox(
             "בחר חלון סביב האירוע (בחודשים):",
             options=[3, 6, 9, 12, 18, 24],
-            index=3 # ברירת מחדל 12 חודשים
+            index=3
         )
 
-        # Format date display text based on whether it has a duration
         if event_date != event_end_date:
             date_display = f"{event_date.strftime('%m/%Y')} – {event_end_date.strftime('%m/%Y')}"
         else:
@@ -852,7 +861,6 @@ with tab_events:
             )
         )
 
-        # Display vrect span if duration exists, otherwise vline
         if event_date != event_end_date:
             fig.add_vrect(
                 x0=event_date,
@@ -893,8 +901,6 @@ with tab_events:
             fig,
             use_container_width=True
         )
-
-        # Before / After calculations based on event start and end dates
 
         before = df[
             (df["date"] < event_date)
@@ -970,37 +976,36 @@ with tab_events:
 
 
 # ============================================================
-# TAB 5 - CONCLUSIONS & INSIGHTS (חדש: לשונית מסקנות ותובנות)
+# TAB 5 - CONCLUSIONS & INSIGHTS
 # ============================================================
 
 with tab_conclusions:
 
-    st.header(
-        "💡 מסקנות ותובנות מרכזיות"
-    )
-
     st.markdown(
         """
-        מתוך הניתוח האנליטי של נתוני מחירי הדיור, הריבית והאירועים הלאומיים בישראל, עולות מספר מסקנות מרכזיות:
-
-        ---
-
-        ### 🏦 1. השפעת הריבית מוגבלת בזמן (Lag Effect)
-        * **תגובה בפיגור:** השינויים בריבית בנק ישראל אינם משפיעים באופן מיידי על מחירי הדיור.
-        * כפי שניתן לראות בניתוח הפיגור (Lag Analysis), ההשפעה של העלאת/הורדת ריבית מתחילה להשתקף במדד מחירי הדיור **בפיגור של כ-6 עד 12 חודשים**.
-        * **ריבית גבוהה כממתנת:** העלאות ריבית אגרסיביות יוצרות ההאטה בקצב עליית המחירים, אך אינן בהכרח מובילות לירידות מחירים ארוכות טווח בשל מגבלות ההיצע.
-
-        ---
-
-        ### ⚡ 2. חוסן שוק הדיור לאירועים חריגים
-        * **קיפאון זמני ולאחריו התאוששות:** אירועים ביטחוניים (כמו מלחמות) או בריאותיים (כמו מגפת הקורונה) יוצרים עצירה זמנית בפעילות השוק ובעסקאות.
-        * **ביקוש כבוש (Pent-up Demand):** מיד לאחר סיום תקופת המשבר/האירוע, השוק נוטה לחזור למגמת עלייה חזקה, לעיתים אף בקצב מואץ, כתוצאה מביקושים שנצברו במהלך המשבר.
-
-        ---
-
-        ### 🏗️ 3. גורמי עומק מבניים
-        * **היצע וביקוש הם המנוע המרכזי:** תוכניות ממשלתיות ואירועים נקודתיים משפיעים בטווח הקצר, אך בטווח הארוך המחסור המבני בהיצע דירות בישראל מהווה את הגורם המרכזי השומר על מגמת העלייה של המדד.
-        """
+        <div style="direction: rtl; text-align: right;">
+        <h2>💡 מסקנות ותובנות מרכזיות</h2>
+        <p>מתוך ניתוח נתוני מחירי הדיור, הריבית והאירועים הלאומיים, עולות שלוש מסקנות מרכזיות:</p>
+        <hr>
+        <h3>🏦 1. השפעת הריבית בפיגור (Lag Effect)</h3>
+        <ul>
+            <li>השינויים בריבית בנק ישראל אינם מייצרים אפקט מיידי על שוק הדיור, אלא משתקפים במדד <strong>בפיגור של כ-6 עד 12 חודשים</strong>.</li>
+            <li>ריבית גבוהה ממתנת את קצב עליית המחירים השנתי, אך אינה גורמת לשבירת השוק או לירידות דרסטיות בשל פערי ההיצע המבניים.</li>
+        </ul>
+        <hr>
+        <h3>⚡ 2. חוסן השוק ודפוס "ביקוש כבוש"</h3>
+        <ul>
+            <li>אירועים ביטחוניים, מדיניים ובריאותיים מייצרים <strong>האטה או קיפאון זמני</strong> בלבד במהלך תקופת האירוע עצמו.</li>
+            <li>מיד עם סיום המשבר, השוק מפגין התאוששות מהירה והמחירים חוזרים למסלול עלייה כתוצאה מביקושים שנצברו במהלכו.</li>
+        </ul>
+        <hr>
+        <h3>🏗️ 3. השפעת תוכניות ממשלתיות אל מול המציאות</h3>
+        <ul>
+            <li>תוכניות דיור ממשלתיות (כמו מחיר למשתכן) מצליחות לייצר השפעה נקודתית בטווח הקצר, אך בראייה רב-שנתית, הפער הבסיסי בין היצע לביקוש הוא המשתנה המרכזי שקובע את מגמת המחירים.</li>
+        </ul>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 
