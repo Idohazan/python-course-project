@@ -115,16 +115,6 @@ st.markdown(
         text-align: right;
     }
 
-    .metric-box {
-        padding: 1rem;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        background: #ffffff;
-        min-height: 120px;
-        direction: rtl;
-        text-align: right;
-    }
-
     </style>
     """,
     unsafe_allow_html=True,
@@ -270,38 +260,33 @@ except Exception as e:
 
 
 # ============================================================
-# MAIN HEADER & INTRODUCTION HERO BOX (פרזנטציה)
+# MAIN HEADER & DASHBOARD INTRO
 # ============================================================
 
-st.title(
-    "שוק הדיור בישראל תחת לחץ"
-)
+st.title("שוק הדיור בישראל תחת לחץ")
 
-st.markdown(
-    """
-    ### כיצד ריבית, אירועים לאומיים ותנאי השוק משפיעים על מחירי הדיור בישראל?
-    """
-)
+st.markdown("""
+### מערכת לניתוח ובקרה של נתוני נדל"ן ומאקרו-כלכלה
+""")
 
 st.markdown(
     """
     <div class="hero-box">
-        <h3 style="margin-top: 0; color: #1f3bb3;">שלום רב וברוכים הבאים למצגת: ניתוח שוק הדיור 🏘️</h3>
+        <h3 style="margin-top: 0; color: #1f3bb3;">ניתוח אינטראקטיבי של שוק הדיור 🏘️</h3>
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
-            בפרזנטציה זו נצלול לעומק הדינמיקה המרתקת של שוק הדיור בישראל, המונעת משילוב של גידול דמוגרפי מהיר, 
-            אתגרי היצע מבניים ושינויי מאקרו-כלכליים דרמטיים. נציג כאן את הנתונים הרשמיים כדי 
-            לבחון כיצד משתנים מובילים כמו שער הריבית ואירועים לאומיים חריגים מעצבים את תנועת מחירי הדיור.
+            דאשבורד זה מאפשר בחינה מעמיקה של הדינמיקה בשוק הדיור הישראלי, תוך הצלבת נתוני מדד מחירי הדיור 
+            מול משתני מאקרו כגון ריבית בנק ישראל ואירועים לאומיים חריגים.
         </p>
-        <p style="font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 5px;">
-            <strong>השאלות המרכזיות שיוצגו וינותחו לאורך המצגת:</strong>
+        <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            <strong>מה ניתן לחקור באמצעות הדאשבורד?</strong>
         </p>
         <ul style="font-size: 15px; color: #444; margin-top: 5px;">
-            <li>האם עליית ריבית מצליחה לבלום את מחירי הדיור באופן מיידי, או שההשפעה מגיעה בפיגור?</li>
-            <li>כיצד אירועים ביטחוניים ומדיניים משפיעים על הפעילות בשוק ובקצב עליית המחירים?</li>
-            <li>האם השוק מפגין חוסן וחוזר במהירות למסלולו לאחר זעזועים חיצוניים?</li>
+            <li><b>התאמת מדיניות:</b> בחינת הקשר בין שינויי ריבית להתנהגות השוק.</li>
+            <li><b>השפעת אירועי קיצון:</b> כיצד משברים (ביטחוניים/מדיניים) מעצבים את תנודות המחירים?</li>
+            <li><b>ניתוח חוסן:</b> זיהוי דפוסי "ביקוש כבוש" והתאוששות השוק לאורך זמן.</li>
         </ul>
         <p style="font-size: 13px; color: #666; margin-top: 15px; margin-bottom: 0;">
-            <em>בשלבים הבאים נעבור יחד על הנתונים, הגרפים והתובנות המלאות.</em>
+            <em>השתמשו בתפריט הצד (Sidebar) כדי לסנן נתונים ולמקד את הניתוח בתקופות זמן או קטגוריות ספציפיות.</em>
         </p>
     </div>
     """,
@@ -333,17 +318,8 @@ st.divider()
 
 st.sidebar.title("🎛️ מסננים")
 
-min_date = (
-    df["date"]
-    .min()
-    .date()
-)
-
-max_date = (
-    df["date"]
-    .max()
-    .date()
-)
+min_date = df["date"].min().date()
+max_date = df["date"].max().date()
 
 date_range = st.sidebar.date_input(
     "טווח תאריכים",
@@ -352,95 +328,40 @@ date_range = st.sidebar.date_input(
     max_value=max_date,
 )
 
-if (
-    isinstance(date_range, tuple)
-    and len(date_range) == 2
-):
-
-    start_date = pd.Timestamp(
-        date_range[0]
-    )
-
-    end_date = pd.Timestamp(
-        date_range[1]
-    )
-
+if isinstance(date_range, tuple) and len(date_range) == 2:
+    start_date = pd.Timestamp(date_range[0])
+    end_date = pd.Timestamp(date_range[1])
 else:
+    start_date = pd.Timestamp(min_date)
+    end_date = pd.Timestamp(max_date)
 
-    start_date = pd.Timestamp(
-        min_date
-    )
+categories = sorted(df["category"].dropna().unique().tolist())
+selected_categories = st.sidebar.multiselect("סוגי קטגוריות", categories, default=categories)
 
-    end_date = pd.Timestamp(
-        max_date
-    )
-
-
-# --- מסנן קטגוריות אירועים ---
-categories = sorted(
-    df["category"]
-    .dropna()
-    .unique()
-    .tolist()
-)
-
-selected_categories = st.sidebar.multiselect(
-    "סוגי קטגוריות",
-    categories,
-    default=categories,
-)
-
-# --- מסנן אירועים ספציפיים דינמי ---
 df_events_only = df[df["is_event"]].copy()
-
 if selected_categories:
-    available_events = sorted(
-        df_events_only[
-            df_events_only["category"].isin(selected_categories)
-        ]["event_name"]
-        .dropna()
-        .unique()
-        .tolist()
-    )
+    available_events = sorted(df_events_only[df_events_only["category"].isin(selected_categories)]["event_name"].dropna().unique().tolist())
 else:
     available_events = []
 
-selected_events = st.sidebar.multiselect(
-    "בחר אירועים ספציפיים",
-    available_events,
-    default=available_events,
-)
+selected_events = st.sidebar.multiselect("בחר אירועים ספציפיים", available_events, default=available_events)
 
 
 # ============================================================
 # FILTER DATA
 # ============================================================
 
-filtered = df[
-    (df["date"] >= start_date)
-    &
-    (df["date"] <= end_date)
-].copy()
-
+filtered = df[(df["date"] >= start_date) & (df["date"] <= end_date)].copy()
 
 if selected_categories:
-
     filtered = filtered[
-        (~filtered["is_event"])
-        |
-        (
-            filtered["category"].isin(selected_categories)
-            &
-            filtered["event_name"].isin(selected_events)
-        )
+        (~filtered["is_event"]) | 
+        (filtered["category"].isin(selected_categories) & filtered["event_name"].isin(selected_events))
     ]
 else:
     filtered = filtered[~filtered["is_event"]]
 
-
-events = filtered[
-    filtered["is_event"]
-].copy()
+events = filtered[filtered["is_event"]].copy()
 
 
 # ============================================================
@@ -463,144 +384,36 @@ tab_overview, tab_questions, tab_relationship, tab_events, tab_conclusions = st.
 # ============================================================
 
 with tab_overview:
-
-    st.header(
-        "📊 תמונת מצב"
-    )
-
-    latest = (
-        filtered
-        .dropna(
-            subset=["index_value"]
-        )
-        .sort_values("date")
-        .iloc[-1]
-    )
-
+    st.header("📊 תמונת מצב")
+    latest = filtered.dropna(subset=["index_value"]).sort_values("date").iloc[-1]
     st.caption(f"📅 נתונים מעודכנים נכון לחודש: {latest['date'].strftime('%m/%Y')}")
 
     c1, c2, c3, c4 = st.columns(4)
+    with c1: st.metric("מדד מחירי דיור", f"{latest['index_value']:.3f}")
+    with c2: st.metric("ריבית בנק ישראל", f"{latest['interest_rate']:.2f}%")
+    with c3: st.metric("שינוי שנתי במחירי הדיור", f"{latest['percentYear']:.1f}%")
+    with c4: st.metric("מספר אירועים", len(events))
 
-    with c1:
-
-        st.metric(
-            "מדד מחירי דיור",
-            f"{latest['index_value']:.3f}"
-        )
-
-    with c2:
-
-        st.metric(
-            "ריבית בנק ישראל",
-            f"{latest['interest_rate']:.2f}%"
-        )
-
-    with c3:
-
-        st.metric(
-            "שינוי שנתי במחירי הדיור",
-            f"{latest['percentYear']:.1f}%"
-        )
-
-    with c4:
-
-        st.metric(
-            "מספר אירועים",
-            len(events)
-        )
-
-    st.subheader(
-        "📈 התפתחות מחירי הדיור לאורך זמן"
-    )
-
+    st.subheader("📈 התפתחות מחירי הדיור לאורך זמן")
     fig = go.Figure()
+    fig.add_trace(go.Scatter(x=filtered["date"], y=filtered["index_value"], mode="lines", name="מדד מחירי הדיור", line=dict(width=3)))
 
-    fig.add_trace(
-        go.Scatter(
-            x=filtered["date"],
-            y=filtered["index_value"],
-            mode="lines",
-            name="מדד מחירי הדיור",
-            line=dict(width=3),
-            hovertemplate=
-                "תאריך: %{x|%m/%Y}"
-                "<br>מדד: %{y:.3f}"
-                "<extra></extra>",
-        )
-    )
-
-    # Event markers or duration spans in overview with staggered heights to prevent overlapping
     for i, (_, row) in enumerate(events.iterrows()):
         start_d = row["date"]
         end_d = row.get("end_date", start_d)
-        if pd.isna(end_d) or end_d < start_d:
-            end_d = start_d
-
+        if pd.isna(end_d) or end_d < start_d: end_d = start_d
         ay_offset = -35 - (i % 3) * 28
 
         if start_d != end_d:
-            fig.add_vrect(
-                x0=start_d,
-                x1=end_d,
-                fillcolor="red",
-                opacity=0.1,
-                layer="below",
-                line_width=0,
-            )
+            fig.add_vrect(x0=start_d, x1=end_d, fillcolor="red", opacity=0.1, layer="below", line_width=0)
             mid_d = start_d + (end_d - start_d) / 2
-            fig.add_annotation(
-                x=mid_d,
-                y=filtered["index_value"].max(),
-                text=row["event_name"],
-                showarrow=False,
-                yshift=10 + (i % 3) * 12,
-                font=dict(size=9, color="darkred"),
-            )
+            fig.add_annotation(x=mid_d, y=filtered["index_value"].max(), text=row["event_name"], showarrow=False, yshift=10 + (i % 3) * 12, font=dict(size=9, color="darkred"))
         else:
-            fig.add_vline(
-                x=start_d,
-                line_width=1,
-                line_dash="dot",
-                opacity=0.35,
-            )
-            fig.add_annotation(
-                x=start_d,
-                y=row["index_value"],
-                text=row["event_name"],
-                showarrow=True,
-                arrowhead=1,
-                ax=0,
-                ay=ay_offset,
-                font=dict(size=9),
-            )
+            fig.add_vline(x=start_d, line_width=1, line_dash="dot", opacity=0.35)
+            fig.add_annotation(x=start_d, y=row["index_value"], text=row["event_name"], showarrow=True, arrowhead=1, ax=0, ay=ay_offset, font=dict(size=9))
 
-    fig.update_layout(
-        height=560,
-        hovermode="x unified",
-        margin=dict(
-            l=20,
-            r=20,
-            t=30,
-            b=20
-        ),
-        xaxis=dict(
-            title="שנה",
-            dtick="M36",
-            tickformat="%Y"
-        ),
-        yaxis_title="מדד מחירי דיור",
-        legend=dict(
-            orientation="h",
-            y=1.08,
-            x=1,
-            xanchor="right"
-        ),
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
+    fig.update_layout(height=560, hovermode="x unified", xaxis=dict(title="שנה", dtick="M36", tickformat="%Y"), yaxis_title="מדד מחירי דיור", legend=dict(orientation="h", y=1.08, x=1, xanchor="right"))
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -608,34 +421,28 @@ with tab_overview:
 # ============================================================
 
 with tab_questions:
-
-    st.header(
-        "🎯 השאלות העסקיות"
-    )
-
-    st.markdown(
-        """
-        הפרויקט נבנה סביב מספר שאלות מרכזיות:
-
-        ### 🏠 1. מגמת מחירי הדיור
-        כיצד התפתחו מחירי הדיור בישראל לאורך התקופה?
-
-        ### 🏦 2. השפעת הריבית
-        האם קיימת התאמה בין ריבית בנק ישראל לבין התנהגות מחירי הדיור?
-
-        ### ⏱️ 3. תגובה בפיגור
-        האם שינויי ריבית משפיעים על שוק הדיור באופן מיידי או בפיגור?
-
-        ### ⚡ 4. אירועים חריגים
-        כיצד הגיב שוק הדיור לאירועים לאומיים משמעותיים?
-
-        ### 📉 5. שינוי מגמה
-        האם אירוע משמעותי יצר שינוי זמני או שינוי מתמשך במגמת השוק?
-
-        ### 🛡️ 6. חוסן השוק
-        עד כמה שוק הדיור הישראלי חוזר למגמה לאחר זעזועים?
-        """
-    )
+    st.header("🎯 השאלות העסקיות")
+    st.markdown("""
+    הפרויקט נבנה סביב מספר שאלות מרכזיות:
+    
+    ### 🏠 1. מגמת מחירי הדיור
+    כיצד התפתחו מחירי הדיור בישראל לאורך התקופה?
+    
+    ### 🏦 2. השפעת הריבית
+    האם קיימת התאמה בין ריבית בנק ישראל לבין התנהגות מחירי הדיור?
+    
+    ### ⏱️ 3. תגובה בפיגור
+    האם שינויי ריבית משפיעים על שוק הדיור באופן מיידי או בפיגור?
+    
+    ### ⚡ 4. אירועים חריגים
+    כיצד הגיב שוק הדיור לאירועים לאומיים משמעותיים?
+    
+    ### 📉 5. שינוי מגמה
+    האם אירוע משמעותי יצר שינוי זמני או שינוי מתמשך במגמת השוק?
+    
+    ### 6. חוסן השוק
+    עד כמה שוק הדיור הישראלי חוזר למגמה לאחר זעזועים?
+    """)
 
 
 # ============================================================
@@ -643,81 +450,12 @@ with tab_questions:
 # ============================================================
 
 with tab_relationship:
-
-    st.header(
-        "🏦 ריבית בנק ישראל מול שוק הדיור"
-    )
-
-    st.markdown(
-        """
-        ### השאלות המרכזיות
-
-        **1.** כיצד השתנו מחירי הדיור בתקופות של עליית ריבית?
-
-        **2.** האם קיימת תגובה של שוק הדיור לשינויי ריבית?
-        """
-    )
-
+    st.header("🏦 ריבית בנק ישראל מול שוק הדיור")
     fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(
-            x=filtered["date"],
-            y=filtered["index_value"],
-            name="מדד מחירי הדיור",
-            mode="lines",
-            line=dict(width=3),
-            yaxis="y1",
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=filtered["date"],
-            y=filtered["interest_rate"],
-            name="ריבית בנק ישראל",
-            mode="lines",
-            line=dict(
-                width=2,
-                dash="dash"
-            ),
-            yaxis="y2",
-        )
-    )
-
-    fig.update_layout(
-        height=560,
-        hovermode="x unified",
-
-        yaxis=dict(
-            title="מדד מחירי דיור"
-        ),
-
-        yaxis2=dict(
-            title="ריבית (%)",
-            overlaying="y",
-            side="right",
-        ),
-
-        margin=dict(
-            l=20,
-            r=80,
-            t=30,
-            b=20
-        ),
-
-        legend=dict(
-            orientation="h",
-            y=1.08,
-            x=1,
-            xanchor="right"
-        ),
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
+    fig.add_trace(go.Scatter(x=filtered["date"], y=filtered["index_value"], name="מדד מחירי הדיור", mode="lines", line=dict(width=3), yaxis="y1"))
+    fig.add_trace(go.Scatter(x=filtered["date"], y=filtered["interest_rate"], name="ריבית בנק ישראל", mode="lines", line=dict(width=2, dash="dash"), yaxis="y2"))
+    fig.update_layout(height=560, hovermode="x unified", yaxis=dict(title="מדד מחירי דיור"), yaxis2=dict(title="ריבית (%)", overlaying="y", side="right"), legend=dict(orientation="h", y=1.08, x=1, xanchor="right"))
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -725,222 +463,43 @@ with tab_relationship:
 # ============================================================
 
 with tab_events:
-
-    st.header(
-        "⚡ תגובת שוק הדיור לאירועים"
-    )
-
-    st.markdown(
-        """
-        ### האם אירועים משמעותיים משנים את מגמת השוק?
-
-        בחר אירוע ובדוק את התנהגות מדד מחירי הדיור
-        לפני ואחרי תקופת האירוע.
-        """
-    )
-
+    st.header("⚡ תגובת שוק הדיור לאירועים")
     if events.empty:
-
-        st.warning(
-            "לא נמצאו אירועים בטווח שנבחר."
-        )
-
+        st.warning("לא נמצאו אירועים בטווח שנבחר.")
     else:
-
-        event_options = (
-            events["event_name"]
-            .tolist()
-        )
-
-        selected_event = st.selectbox(
-            "בחר אירוע",
-            event_options
-        )
-
-        event_row = events[
-            events["event_name"]
-            == selected_event
-        ].iloc[0]
-
+        selected_event = st.selectbox("בחר אירוע", events["event_name"].tolist())
+        event_row = events[events["event_name"] == selected_event].iloc[0]
         event_date = event_row["date"]
         event_end_date = event_row.get("end_date", event_date)
-        if pd.isna(event_end_date):
-            event_end_date = event_date
+        window = st.selectbox("בחר חלון סביב האירוע (בחודשים):", options=[3, 6, 9, 12, 18, 24], index=3)
 
-        window = st.selectbox(
-            "בחר חלון סביב האירוע (בחודשים):",
-            options=[3, 6, 9, 12, 18, 24],
-            index=3
-        )
+        st.markdown(f"**אירוע:** {selected_event} | **טווח:** {event_date.strftime('%m/%Y')} – {event_end_date.strftime('%m/%Y')}")
 
-        if event_date != event_end_date:
-            date_display = f"{event_date.strftime('%m/%Y')} – {event_end_date.strftime('%m/%Y')}"
-        else:
-            date_display = event_date.strftime('%m/%Y')
-
-        st.markdown(
-            f"""
-            **אירוע:** {selected_event}
-
-            **טווח תאריכים:** {date_display}
-
-            **קטגוריה:** {event_row['category']}
-
-            **עוצמת אירוע:** {event_row['impact']:.0f}/5
-            """
-        )
-
-        event_window = df[
-            (
-                df["date"]
-                >= event_date
-                - pd.DateOffset(
-                    months=window
-                )
-            )
-            &
-            (
-                df["date"]
-                <= event_end_date
-                + pd.DateOffset(
-                    months=window
-                )
-            )
-        ].copy()
-
+        event_window = df[(df["date"] >= event_date - pd.DateOffset(months=window)) & (df["date"] <= event_end_date + pd.DateOffset(months=window))].copy()
         fig = go.Figure()
-
-        fig.add_trace(
-            go.Scatter(
-                x=event_window["date"],
-                y=event_window["index_value"],
-                mode="lines",
-                name="מדד מחירי הדיור",
-                line=dict(width=3),
-            )
-        )
+        fig.add_trace(go.Scatter(x=event_window["date"], y=event_window["index_value"], mode="lines", name="מדד מחירי הדיור"))
 
         if event_date != event_end_date:
             mid_date = event_date + (event_end_date - event_date) / 2
-            fig.add_vrect(
-                x0=event_date,
-                x1=event_end_date,
-                fillcolor="red",
-                opacity=0.15,
-                line_width=0,
-            )
-            fig.add_annotation(
-                x=mid_date,
-                y=event_window["index_value"].max(),
-                text="משך האירוע",
-                showarrow=False,
-                yshift=15,
-                xanchor="center",
-            )
+            fig.add_vrect(x0=event_date, x1=event_end_date, fillcolor="red", opacity=0.15, line_width=0)
+            fig.add_annotation(x=mid_date, y=event_window["index_value"].max(), text="משך האירוע", showarrow=False, yshift=15, xanchor="center")
         else:
-            fig.add_vline(
-                x=event_date,
-                line_width=3,
-                line_dash="dash",
-            )
-            fig.add_annotation(
-                x=event_date,
-                y=event_window["index_value"].max(),
-                text="האירוע",
-                showarrow=False,
-                yshift=15,
-                xanchor="center",
-            )
+            fig.add_vline(x=event_date, line_width=3, line_dash="dash")
+            fig.add_annotation(x=event_date, y=event_window["index_value"].max(), text="האירוע", showarrow=False, yshift=15, xanchor="center")
 
-        fig.update_layout(
-            height=500,
-            hovermode="x unified",
-            xaxis_title="תאריך",
-            yaxis_title="מדד מחירי דיור",
-            margin=dict(
-                l=20,
-                r=20,
-                t=30,
-                b=20
-            ),
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
-        before = df[
-            (df["date"] < event_date)
-            &
-            (
-                df["date"]
-                >= event_date
-                - pd.DateOffset(
-                    months=window
-                )
-            )
-        ]["index_value"].dropna()
-
-        after = df[
-            (df["date"] > event_end_date)
-            &
-            (
-                df["date"]
-                <= event_end_date
-                + pd.DateOffset(
-                    months=window
-                )
-            )
-        ]["index_value"].dropna()
-
+        fig.update_layout(height=500, xaxis_title="תאריך", yaxis_title="מדד מחירי דיור")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Calculate changes
+        before = df[(df["date"] < event_date) & (df["date"] >= event_date - pd.DateOffset(months=window))]["index_value"].dropna()
+        after = df[(df["date"] > event_end_date) & (df["date"] <= event_end_date + pd.DateOffset(months=window))]["index_value"].dropna()
         if len(before) and len(after):
-
-            before_change = (
-                (
-                    before.iloc[-1]
-                    /
-                    before.iloc[0]
-                )
-                - 1
-            ) * 100
-
-            after_change = (
-                (
-                    after.iloc[-1]
-                    /
-                    after.iloc[0]
-                )
-                - 1
-            ) * 100
-
-            difference = (
-                after_change
-                - before_change
-            )
-
+            before_change = ((before.iloc[-1] / before.iloc[0]) - 1) * 100
+            after_change = ((after.iloc[-1] / after.iloc[0]) - 1) * 100
             b1, b2, b3 = st.columns(3)
-
-            with b1:
-
-                st.metric(
-                    "שינוי בתקופה שלפני",
-                    f"{before_change:.1f}%"
-                )
-
-            with b2:
-
-                st.metric(
-                    "שינוי בתקופה שאחרי",
-                    f"{after_change:.1f}%"
-                )
-
-            with b3:
-
-                st.metric(
-                    "הפרש בין התקופות",
-                    f"{difference:+.1f}%"
-                )
+            with b1: st.metric("שינוי בתקופה שלפני", f"{before_change:.1f}%")
+            with b2: st.metric("שינוי בתקופה שאחרי", f"{after_change:.1f}%")
+            with b3: st.metric("הפרש", f"{after_change - before_change:+.1f}%")
 
 
 # ============================================================
@@ -948,42 +507,31 @@ with tab_events:
 # ============================================================
 
 with tab_conclusions:
-
     st.markdown(
         """
         <div style="direction: rtl; text-align: right;">
         <h2>💡 מסקנות ותובנות מרכזיות</h2>
-        <p>מתוך ניתוח נתוני מחירי הדיור, הריבית והאירועים הלאומיים, עולות שלוש מסקנות מרכזיות:</p>
         <hr>
         <h3>🏦 1. השפעת הריבית בפיגור (Lag Effect)</h3>
         <ul>
-            <li>השינויים בריבית בנק ישראל אינם מייצרים אפקט מיידי על שוק הדיור, אלא משתקפים במדד <strong>בפיגור של כ-6 עד 12 חודשים</strong>.</li>
-            <li>ריבית גבוהה ממתנת את קצב עליית המחירים השנתי, אך אינה גורמת לשבירת השוק או לירידות דרסטיות בשל פערי ההיצע המבניים.</li>
+            <li>השינויים בריבית בנק ישראל משתקפים במדד <strong>בפיגור של כ-6 עד 12 חודשים</strong>.</li>
+            <li>ריבית גבוהה ממתנת את קצב עליית המחירים אך אינה עוצרת את השוק בשל פערי היצע מבניים.</li>
         </ul>
         <hr>
         <h3>📈 2. התאוששות מהירה וביקושים מצטברים</h3>
         <ul>
-            <li>אירועים ביטחוניים, מדיניים ובריאותיים מייצרים <strong>האטה או קיפאון זמני</strong> בלבד במהלך תקופת האירוע עצמו.</li>
-            <li>מיד עם סיום המשבר, השוק מפגין התאוששות מהירה והמחירים חוזרים למסלול עלייה כתוצאה מביקושים שנצברו במהלכו.</li>
+            <li>אירועים קיצוניים מייצרים האטה או קיפאון זמני בלבד.</li>
+            <li>השוק מפגין חוסן וחוזר למסלול עלייה במהירות הודות לביקוש כבוש.</li>
         </ul>
         <hr>
-        <h3>🏗️ 3. השפעת תוכניות ממשלתיות אל מול המציאות</h3>
+        <h3>🏗️ 3. השפעת תוכניות ממשלתיות</h3>
         <ul>
-            <li>תוכניות דיור ממשלתיות (כמו מחיר למשתכן) מצליחות לייצר השפעה נקודתית בטווח הקצר, אך בראייה רב-שנתית, הפער הבסיסי בין היצע לביקוש הוא המשתנה המרכזי שקובע את מגמת המחירים.</li>
+            <li>תוכניות ממשלתיות יוצרות השפעה נקודתית, אך הפער הבסיסי בין היצע לביקוש הוא המניע המרכזי למחירים.</li>
         </ul>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-
-# ============================================================
-# FOOTER
-# ============================================================
-
 st.divider()
-
-st.caption(
-    "Israel Housing Market Dashboard | "
-    "Python • Pandas • ETL • Streamlit"
-)
+st.caption("Israel Housing Market Dashboard | Python • Pandas • ETL • Streamlit")
