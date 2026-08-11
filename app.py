@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL & Clean UI)
+# CUSTOM CSS (RTL, Multiselect Box Expansion & Clean UI)
 # ============================================================
 
 st.markdown(
@@ -62,24 +62,36 @@ st.markdown(
         text-align: right;
     }
 
+    /* תיקון קריטי לתיבות ה-Multiselect: הגדלת המשבצת אוטומטית וסידור התגיות כך שלא ייחתכו */
+    div[data-baseweb="select"] > div:first-child {
+        min-height: 55px !important;
+        height: auto !important;
+        flex-wrap: wrap !important;
+        padding: 6px !important;
+        direction: rtl !important;
+    }
+
+    [data-baseweb="tag"] {
+        direction: rtl !important;
+        text-align: right !important;
+        background-color: #ff4b4b !important;
+        border-radius: 6px !important;
+        padding: 2px 8px !important;
+        margin: 3px !important;
+    }
+    
+    [data-baseweb="tag"] span {
+        color: white !important;
+        font-size: 12px !important;
+    }
+
+    [data-baseweb="tag"] span[role="button"] {
+        transform: scale(0.75);
+    }
+
     /* יישור לשוניות (Tabs) לימין */
     .stTabs [data-baseweb="tab-list"] {
         direction: rtl;
-    }
-
-    /* הקטנת תגיות ה-Multiselect */
-    [data-baseweb="tag"] {
-        font-size: 11px !important;
-        padding: 1px 4px !important;
-        max-width: 100% !important;
-        background-color: #ff4b4b !important;
-    }
-    [data-baseweb="tag"] span {
-        font-size: 11px !important;
-        color: white !important;
-    }
-    [data-baseweb="tag"] span[role="button"] {
-        transform: scale(0.7);
     }
 
     .hero-box {
