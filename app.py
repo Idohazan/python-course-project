@@ -62,7 +62,7 @@ st.markdown(
         text-align: right;
     }
 
-    /* תיקון מוחלט לסליידרים: הכרחת החלק הפנימי לעבוד ב-LTR למניעת תקיעת הפס האדום */
+    /* תיקון מוחלט לסליידרים תחת RTL למניעת ניתוק בין הפס האדום לכפתור */
     .stSlider {
         direction: rtl !important;
     }
@@ -70,8 +70,10 @@ st.markdown(
         text-align: right !important;
         direction: rtl !important;
     }
-    .stSlider div[data-baseweb="slider"],
-    .stSlider div[data-baseweb="slider"] div {
+    div[data-baseweb="slider"] {
+        direction: ltr !important;
+    }
+    div[data-baseweb="slider"] > div {
         direction: ltr !important;
     }
 
@@ -255,8 +257,6 @@ st.title(
 st.markdown(
     """
     ### כיצד ריבית, אירועים לאומיים ותנאי השוק משפיעים על מחירי הדיור בישראל?
-
-    **ETL · Pandas · Data Analysis · Streamlit**
     """
 )
 
