@@ -308,6 +308,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# --- הצגת תהליך ה-ETL ממש מתחת לקופסת הפתיחה ומעל הלשוניות ---
+with st.container():
+    st.markdown("### 🔧 תהליך ה-ETL והכנת הנתונים")
+    st.markdown(
+        """
+        * **Extract:** טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.
+        * **Transform:** המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.
+        * **Feature Engineering:** יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.
+        * **Load & Analyze:** יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.
+        """
+    )
+
 st.divider()
 
 
@@ -428,7 +440,7 @@ events = filtered[
 
 
 # ============================================================
-# TABS (Updated without ETL tab)
+# TABS
 # ============================================================
 
 tab_overview, tab_questions, tab_relationship, tab_events, tab_conclusions = st.tabs(
@@ -443,7 +455,7 @@ tab_overview, tab_questions, tab_relationship, tab_events, tab_conclusions = st.
 
 
 # ============================================================
-# TAB 1 - OVERVIEW (Now containing ETL Expander at the bottom)
+# TAB 1 - OVERVIEW
 # ============================================================
 
 with tab_overview:
@@ -585,93 +597,6 @@ with tab_overview:
         fig,
         use_container_width=True
     )
-
-    st.divider()
-
-    # --- הוספת תיבה נפתחת (Expander) לתהליך ה-ETL בתחתית לשונית הסקירה ---
-    with st.expander("🔧 הצג את תהליך ה-ETL ונתונים מאחורי הקלעים"):
-        st.markdown(
-            """
-            ### שלבי התהליך
-
-            **1. Extract**
-            טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.
-
-            **2. Transform**
-            המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.
-
-            **3. Feature Engineering**
-            יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.
-
-            **4. Load & Analyze**
-            יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.
-            """
-        )
-
-        st.subheader(
-            "🔍 בדיקות איכות נתונים"
-        )
-
-        quality = {
-
-            "מספר רשומות":
-                len(df),
-
-            "מספר עמודות":
-                len(df.columns),
-
-            "טווח תאריכים":
-                (
-                    f"{df['date'].min().strftime('%m/%Y')}"
-                    f" – "
-                    f"{df['date'].max().strftime('%m/%Y')}"
-                ),
-
-            "ערכים חסרים":
-                int(
-                    df.isna()
-                    .sum()
-                    .sum()
-                ),
-
-            "רשומות אירועים":
-                int(
-                    df["is_event"]
-                    .sum()
-                ),
-
-            "כפילויות":
-                int(
-                    df.duplicated()
-                    .sum()
-                ),
-        }
-
-        qcols = st.columns(3)
-
-        for index, (
-            label,
-            value
-        ) in enumerate(
-            quality.items()
-        ):
-
-            with qcols[index % 3]:
-
-                st.metric(
-                    label,
-                    value
-                )
-
-        st.subheader(
-            "📋 Preview של הנתונים"
-        )
-
-        st.dataframe(
-            filtered.head(20),
-            use_container_width=True,
-            hide_index=True,
-        )
 
 
 # ============================================================
