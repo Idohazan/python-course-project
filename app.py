@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL & Slider Fix)
+# CUSTOM CSS (RTL & Complete Slider Fix)
 # ============================================================
 
 st.markdown(
@@ -62,7 +62,7 @@ st.markdown(
         text-align: right;
     }
 
-    /* תיקון קריטי לסליידר: מונע מהפס האדום להתרסק תחת RTL */
+    /* תיקון מוחלט לסליידרים: הכרחת החלק הפנימי לעבוד ב-LTR למניעת תקיעת הפס האדום */
     .stSlider {
         direction: rtl !important;
     }
@@ -70,8 +70,8 @@ st.markdown(
         text-align: right !important;
         direction: rtl !important;
     }
-    /* הכרחת רכיב הפס והמנהל של הסליידר לעבוד ב-LTR פנימי כדי שהגרירה והפס יעבדו יחד מושלם */
-    div[data-baseweb="slider"] {
+    .stSlider div[data-baseweb="slider"],
+    .stSlider div[data-baseweb="slider"] div {
         direction: ltr !important;
     }
 
