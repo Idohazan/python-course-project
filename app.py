@@ -171,6 +171,15 @@ def load_data(path: str) -> pd.DataFrame:
         errors="coerce"
     )
 
+    # End date conversion support
+    if "end_date" in data.columns:
+        data["end_date"] = pd.to_datetime(
+            data["end_date"],
+            errors="coerce"
+        )
+    else:
+        data["end_date"] = data["date"]
+
     # Numeric conversion
     numeric_columns = [
         "percent",
@@ -470,26 +479,48 @@ with tab_overview:
         )
     )
 
-    # Event markers
+    # Event markers or duration spans in overview
     for _, row in events.iterrows():
+        start_d = row["date"]
+        end_d = row.get("end_date", start_d)
+        if pd.isna(end_d) or end_d < start_d:
+            end_d = start_d
 
-        fig.add_vline(
-            x=row["date"],
-            line_width=1,
-            line_dash="dot",
-            opacity=0.35,
-        )
-
-        fig.add_annotation(
-            x=row["date"],
-            y=row["index_value"],
-            text=row["event_name"],
-            showarrow=True,
-            arrowhead=1,
-            ax=0,
-            ay=-35,
-            font=dict(size=10),
-        )
+        if start_d != end_d:
+            fig.add_vrect(
+                x0=start_d,
+                x1=end_d,
+                fillcolor="red",
+                opacity=0.1,
+                layer="below",
+                line_width=0,
+            )
+            mid_d = start_d + (end_d - start_d) / 2
+            fig.add_annotation(
+                x=mid_d,
+                y=filtered["index_value"].max(),
+                text=row["event_name"],
+                showarrow=False,
+                yshift=10,
+                font=dict(size=9, color="darkred"),
+            )
+        else:
+            fig.add_vline(
+                x=start_d,
+                line_width=1,
+                line_dash="dot",
+                opacity=0.35,
+            )
+            fig.add_annotation(
+                x=start_d,
+                y=row["index_value"],
+                text=row["event_name"],
+                showarrow=True,
+                arrowhead=1,
+                ax=0,
+                ay=-35,
+                font=dict(size=10),
+            )
 
     fig.update_layout(
         height=560,
@@ -671,7 +702,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 3 - EVENTS
+# TAB 3 - EVENTS (Updated with Duration / End Date Support)
 # ============================================================
 
 with tab_events:
@@ -685,7 +716,7 @@ with tab_events:
         ### האם אירועים משמעותיים משנים את מגמת השוק?
 
         בחר אירוע ובדוק את התנהגות מדד מחירי הדיור
-        לפני ואחרי האירוע.
+        לפני ואחרי תקופת האירוע.
         """
     )
 
@@ -713,6 +744,9 @@ with tab_events:
         ].iloc[0]
 
         event_date = event_row["date"]
+        event_end_date = event_row.get("end_date", event_date)
+        if pd.isna(event_end_date):
+            event_end_date = event_date
 
         window = st.selectbox(
             "בחר חלון סביב האירוע (בחודשים):",
@@ -720,11 +754,17 @@ with tab_events:
             index=3 # ברירת מחדל 12 חודשים
         )
 
+        # Format date display text based on whether it has a duration
+        if event_date != event_end_date:
+            date_display = f"{event_date.strftime('%m/%Y')} – {event_end_date.strftime('%m/%Y')}"
+        else:
+            date_display = event_date.strftime('%m/%Y')
+
         st.markdown(
             f"""
             **אירוע:** {selected_event}
 
-            **תאריך:** {event_date.strftime('%m/%Y')}
+            **טווח תאריכים:** {date_display}
 
             **קטגוריה:** {event_row['category']}
 
@@ -743,7 +783,7 @@ with tab_events:
             &
             (
                 df["date"]
-                <= event_date
+                <= event_end_date
                 + pd.DateOffset(
                     months=window
                 )
@@ -762,21 +802,29 @@ with tab_events:
             )
         )
 
-        fig.add_vline(
-            x=event_date,
-            line_width=3,
-            line_dash="dash",
-        )
-
-        fig.add_annotation(
-            x=event_date,
-            y=event_window[
-                "index_value"
-            ].max(),
-            text="האירוע",
-            showarrow=False,
-            yshift=15,
-        )
+        # Display vrect span if duration exists, otherwise vline
+        if event_date != event_end_date:
+            fig.add_vrect(
+                x0=event_date,
+                x1=event_end_date,
+                fillcolor="red",
+                opacity=0.15,
+                annotation_text="משך האירוע",
+                annotation_position="top left",
+            )
+        else:
+            fig.add_vline(
+                x=event_date,
+                line_width=3,
+                line_dash="dash",
+            )
+            fig.add_annotation(
+                x=event_date,
+                y=event_window["index_value"].max(),
+                text="האירוע",
+                showarrow=False,
+                yshift=15,
+            )
 
         fig.update_layout(
             height=500,
@@ -796,7 +844,7 @@ with tab_events:
             use_container_width=True
         )
 
-        # Before / After
+        # Before / After calculations based on event start and end dates
 
         before = df[
             (df["date"] < event_date)
@@ -811,11 +859,11 @@ with tab_events:
         ]["index_value"].dropna()
 
         after = df[
-            (df["date"] > event_date)
+            (df["date"] > event_end_date)
             &
             (
                 df["date"]
-                <= event_date
+                <= event_end_date
                 + pd.DateOffset(
                     months=window
                 )
@@ -874,26 +922,26 @@ with tab_events:
             "📋 אירועים בטווח הנבחר"
         )
 
+        # Display table with start date and end date
+        event_table_cols = ["date", "event_name", "category", "impact"]
+        rename_cols = {
+            "date": "תאריך התחלה",
+            "event_name": "אירוע",
+            "category": "קטגוריה",
+            "impact": "עוצמה",
+        }
+        if "end_date" in events.columns:
+            event_table_cols.insert(1, "end_date")
+            rename_cols["end_date"] = "תאריך סיום"
+
         st.dataframe(
-            events[
-                [
-                    "date",
-                    "event_name",
-                    "category",
-                    "impact"
-                ]
-            ]
+            events[event_table_cols]
             .sort_values(
                 "date",
                 ascending=False
             )
             .rename(
-                columns={
-                    "date": "תאריך",
-                    "event_name": "אירוע",
-                    "category": "קטגוריה",
-                    "impact": "עוצמה",
-                }
+                columns=rename_cols
             ),
             use_container_width=True,
             hide_index=True,
