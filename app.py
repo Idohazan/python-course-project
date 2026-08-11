@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL & Complete Slider Fix)
+# CUSTOM CSS (RTL, Slider & Multiselect Tag Fixes)
 # ============================================================
 
 st.markdown(
@@ -77,14 +77,24 @@ st.markdown(
         direction: ltr !important;
     }
 
+    /* תיקון והקטנת תגיות ה-Multiselect (Dropdown) כדי שלא יחתכו את הטקסט ויסתדרו יפה */
+    [data-baseweb="tag"] {
+        font-size: 11px !important;
+        padding: 1px 4px !important;
+        max-width: 100% !important;
+        background-color: #ff4b4b !important;
+    }
+    [data-baseweb="tag"] span {
+        font-size: 11px !important;
+        color: white !important;
+    }
+    [data-baseweb="tag"] span[role="button"] {
+        transform: scale(0.7);
+    }
+
     /* יישור לשוניות (Tabs) לימין */
     .stTabs [data-baseweb="tab-list"] {
         direction: rtl;
-    }
-
-    /* הקטנת כפתורי ה-X (מחיקה) בתגיות של ה-Multiselect */
-    [data-baseweb="tag"] span[role="button"] {
-        transform: scale(0.75);
     }
 
     .hero-box {
