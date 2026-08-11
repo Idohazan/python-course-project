@@ -275,10 +275,6 @@ except Exception as e:
 
 st.title("שוק הדיור בישראל תחת לחץ")
 
-st.markdown("""
-### מערכת לניתוח ובקרה של נתוני נדל"ן ומאקרו-כלכלה
-""")
-
 st.markdown(
     """
     <div class="hero-box">
