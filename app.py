@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL & UI Fixes)
+# CUSTOM CSS (RTL & Slider Fix)
 # ============================================================
 
 st.markdown(
@@ -62,16 +62,17 @@ st.markdown(
         text-align: right;
     }
 
-    /* תיקון באג ה-Slider תחת RTL כדי שהפס והכפתור יזוזו יחד בדיוק */
+    /* תיקון קריטי לסליידר: מונע מהפס האדום להתרסק תחת RTL */
     .stSlider {
         direction: rtl !important;
-    }
-    .stSlider [data-baseweb="slider"] {
-        direction: ltr !important;
     }
     .stSlider label {
         text-align: right !important;
         direction: rtl !important;
+    }
+    /* הכרחת רכיב הפס והמנהל של הסליידר לעבוד ב-LTR פנימי כדי שהגרירה והפס יעבדו יחד מושלם */
+    div[data-baseweb="slider"] {
+        direction: ltr !important;
     }
 
     /* יישור לשוניות (Tabs) לימין */
