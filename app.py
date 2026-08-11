@@ -114,6 +114,16 @@ st.markdown(
         direction: rtl;
         text-align: right;
     }
+    
+    .etl-box {
+        padding: 20px;
+        border-radius: 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        margin-bottom: 25px;
+        direction: rtl;
+        text-align: right;
+    }
 
     </style>
     """,
@@ -293,15 +303,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- הצגת תהליך ה-ETL מיושר לימין ---
+# --- הצגת תהליך ה-ETL המשופר ---
 st.markdown(
     """
-    <div style="direction: rtl; text-align: right;">
-        <h3>🔧 תהליך ה-ETL והכנת הנתונים</h3>
-        <ul>
+    <div class="etl-box">
+        <h3 style="margin-top: 0; color: #1f3bb3;">🔧 תהליך ה-ETL, הכנת הנתונים וניהול גרסאות</h3>
+        <ul style="line-height: 2;">
             <li><strong>Extract:</strong> טעינת נתוני מחירי דיור, ריבית ואירועים ממקור הנתונים.</li>
             <li><strong>Transform:</strong> המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.</li>
             <li><strong>Feature Engineering:</strong> יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית, משתני זמן וסימון אירועים.</li>
+            <li><strong>Version Control (Git):</strong> ניהול הקוד וגרסאות הפרויקט באמצעות Git ו-GitHub.</li>
             <li><strong>Load & Analyze:</strong> יצירת Dataset אנליטי אחיד המשמש את Pandas ואת ה-Dashboard.</li>
         </ul>
     </div>
@@ -440,7 +451,7 @@ with tab_questions:
     ### 📉 5. שינוי מגמה
     האם אירוע משמעותי יצר שינוי זמני או שינוי מתמשך במגמת השוק?
     
-    ### 6. חוסן השוק
+    ### 🛡️ 6. חוסן השוק
     עד כמה שוק הדיור הישראלי חוזר למגמה לאחר זעזועים?
     """)
 
@@ -526,7 +537,7 @@ with tab_conclusions:
         <hr>
         <h3>🏗️ 3. השפעת תוכניות ממשלתיות</h3>
         <ul>
-            <li>תוכניות ממשלתיות יוצרות השפעה נקודתית, אך הפער הבסיסי בין היצע לביקוש הוא המניע המרכזי למחירים.</li>
+            <li>תוכניות ממשלתיות יוצרות השפעה נקודתית, אך הפער הבסיסי בין היצע לביקוש הוא המשתנה המרכזי שקובע את מגמת המחירים.</li>
         </ul>
         </div>
         """,
