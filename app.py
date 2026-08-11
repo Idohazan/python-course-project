@@ -636,7 +636,7 @@ with tab_questions:
 
 
 # ============================================================
-# TAB 3 - INTEREST RATE (Updated without Lag Analysis)
+# TAB 3 - INTEREST RATE
 # ============================================================
 
 with tab_relationship:
@@ -718,7 +718,7 @@ with tab_relationship:
 
 
 # ============================================================
-# TAB 4 - EVENTS
+# TAB 4 - EVENTS (Updated: Center aligned duration text)
 # ============================================================
 
 with tab_events:
@@ -824,7 +824,7 @@ with tab_events:
                 fillcolor="red",
                 opacity=0.15,
                 annotation_text="משך האירוע",
-                annotation_position="top left",
+                annotation_position="top center",  # מיקום הכותרת באמצע
             )
         else:
             fig.add_vline(
