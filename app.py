@@ -312,6 +312,7 @@ else:
     )
 
 
+# --- מסנן קטגוריות אירועים ---
 categories = sorted(
     df["category"]
     .dropna()
@@ -320,9 +321,30 @@ categories = sorted(
 )
 
 selected_categories = st.sidebar.multiselect(
-    "סוגי אירועים",
+    "סוגי קטגוריות",
     categories,
     default=categories,
+)
+
+# --- מסנן אירועים ספציפיים דינמי (מתעדכן לפי הקטגוריות שנבחרו) ---
+df_events_only = df[df["is_event"]].copy()
+
+if selected_categories:
+    available_events = sorted(
+        df_events_only[
+            df_events_only["category"].isin(selected_categories)
+        ]["event_name"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+else:
+    available_events = []
+
+selected_events = st.sidebar.multiselect(
+    "בחר אירועים ספציפיים",
+    available_events,
+    default=available_events,
 )
 
 
@@ -343,10 +365,13 @@ if selected_categories:
         (~filtered["is_event"])
         |
         (
-            filtered["category"]
-            .isin(selected_categories)
+            filtered["category"].isin(selected_categories)
+            &
+            filtered["event_name"].isin(selected_events)
         )
     ]
+else:
+    filtered = filtered[~filtered["is_event"]]
 
 
 events = filtered[
