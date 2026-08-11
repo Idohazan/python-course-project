@@ -11,14 +11,14 @@ from pathlib import Path
 
 st.set_page_config(
     page_title="Israel Housing Market",
-    page_icon="🇮🇱",
+    page_icon="🏘️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 
 # ============================================================
-# CUSTOM CSS (RTL & Right Alignment)
+# CUSTOM CSS (RTL & UI Tweaks)
 # ============================================================
 
 st.markdown(
@@ -56,7 +56,7 @@ st.markdown(
         text-align: right;
     }
 
-    /* יישור תוויות של סליידרים, תיבח בחירה ותאריכים לימין */
+    /* יישור תוויות של סליידרים, תיבות בחירה ותאריכים לימין */
     label, .stSelectbox label, .stSlider label, .stDateInput label {
         direction: rtl;
         text-align: right;
@@ -65,6 +65,11 @@ st.markdown(
     /* יישור לשוניות (Tabs) לימין */
     .stTabs [data-baseweb="tab-list"] {
         direction: rtl;
+    }
+
+    /* הקטנת כפתורי ה-X (מחיקה) בתגיות של ה-Multiselect */
+    [data-baseweb="tag"] span[role="button"] {
+        transform: scale(0.75);
     }
 
     .hero-box {
@@ -231,13 +236,12 @@ except Exception as e:
 # ============================================================
 
 st.title(
-    "🇮🇱 שוק הדיור בישראל תחת לחץ"
+    "שוק הדיור בישראל תחת לחץ"
 )
 
 st.markdown(
     """
-    ### כיצד ריבית, אירועים לאומיים ותנאי השוק
-    משפיעים על מחירי הדיור בישראל?
+    ### כיצד ריבית, אירועים לאומיים ותנאי השוק משפיעים על מחירי הדיור בישראל?
 
     **ETL · Pandas · Data Analysis · Streamlit**
     """
@@ -335,14 +339,6 @@ if selected_categories:
 events = filtered[
     filtered["is_event"]
 ].copy()
-
-
-st.sidebar.divider()
-
-st.sidebar.caption(
-    "מקור הנתונים: "
-    "israel_housing_dashboard_data.csv"
-)
 
 
 # ============================================================
@@ -562,37 +558,9 @@ with tab_relationship:
         use_container_width=True
     )
 
-    # Correlation
-
-    corr_data = filtered[
-        [
-            "index_value",
-            "interest_rate"
-        ]
-    ].dropna()
-
-    if len(corr_data) > 2:
-
-        corr = corr_data[
-            "index_value"
-        ].corr(
-            corr_data["interest_rate"]
-        )
-
-        st.metric(
-            "מתאם Pearson",
-            f"{corr:.2f}"
-        )
-
-        st.caption(
-            "⚠️ מתאם אינו מוכיח סיבתיות. "
-            "הקשר עשוי להיות מושפע מגורמים נוספים."
-        )
-
-    # Lag analysis
-
+    # Lag analysis with dynamic red line updating based on the slider bar
     st.subheader(
-        "⏱️ האם קיימת השפעה בפיגור?"
+        "⏱️ ניתוח השפעה בפיגור (Lag Analysis)"
     )
 
     lag_months = st.slider(
@@ -613,6 +581,49 @@ with tab_relationship:
     lag_df["rate_lagged"] = (
         lag_df["interest_rate"]
         .shift(lag_months)
+    )
+
+    # Visual chart for lag analysis where the red line updates dynamically with the bar slider
+    fig_lag = go.Figure()
+
+    fig_lag.add_trace(
+        go.Scatter(
+            x=lag_df["date"],
+            y=lag_df["index_value"],
+            name="מדד מחירי הדיור",
+            mode="lines",
+            line=dict(width=2, color="blue"),
+            yaxis="y1",
+        )
+    )
+
+    fig_lag.add_trace(
+        go.Scatter(
+            x=lag_df["date"],
+            y=lag_df["rate_lagged"],
+            name=f"ריבית בפיגור של {lag_months} חודשים",
+            mode="lines",
+            line=dict(width=2, color="red", dash="dot"),
+            yaxis="y2",
+        )
+    )
+
+    fig_lag.update_layout(
+        height=450,
+        hovermode="x unified",
+        yaxis=dict(title="מדד מחירי דיור"),
+        yaxis2=dict(
+            title="ריבית בפיגור (%)",
+            overlaying="y",
+            side="right",
+        ),
+        margin=dict(l=20, r=80, t=30, b=20),
+        legend=dict(orientation="h", y=1.08, x=1, xanchor="right"),
+    )
+
+    st.plotly_chart(
+        fig_lag,
+        use_container_width=True
     )
 
     lag_corr = lag_df[
