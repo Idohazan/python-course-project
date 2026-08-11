@@ -496,7 +496,6 @@ with tab_overview:
         if pd.isna(end_d) or end_d < start_d:
             end_d = start_d
 
-        # פיזור אוטומטי של גובה ההתוויה לפי האינדקס למניעת חפיפה
         ay_offset = -35 - (i % 3) * 28
 
         if start_d != end_d:
@@ -544,7 +543,11 @@ with tab_overview:
             t=30,
             b=20
         ),
-        xaxis_title="תאריך",
+        xaxis=dict(
+            title="שנה",
+            dtick="M36",
+            tickformat="%Y"
+        ),
         yaxis_title="מדד מחירי דיור",
         legend=dict(
             orientation="h",
@@ -557,12 +560,6 @@ with tab_overview:
     st.plotly_chart(
         fig,
         use_container_width=True
-    )
-
-    st.info(
-        "💡 הגרף מאפשר לזהות שינויי מגמה "
-        "ולבחון אותם ביחס לאירועים משמעותיים "
-        "שהתרחשו באותה תקופה."
     )
 
 
