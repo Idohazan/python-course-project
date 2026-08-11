@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS (RTL & UI Tweaks)
+# CUSTOM CSS (RTL & UI Fixes)
 # ============================================================
 
 st.markdown(
@@ -60,6 +60,18 @@ st.markdown(
     label, .stSelectbox label, .stSlider label, .stDateInput label {
         direction: rtl;
         text-align: right;
+    }
+
+    /* תיקון באג ה-Slider תחת RTL כדי שהפס והכפתור יזוזו יחד בדיוק */
+    .stSlider {
+        direction: rtl !important;
+    }
+    .stSlider [data-baseweb="slider"] {
+        direction: ltr !important;
+    }
+    .stSlider label {
+        text-align: right !important;
+        direction: rtl !important;
     }
 
     /* יישור לשוניות (Tabs) לימין */
@@ -624,21 +636,6 @@ with tab_relationship:
     st.plotly_chart(
         fig_lag,
         use_container_width=True
-    )
-
-    lag_corr = lag_df[
-        "rate_lagged"
-    ].corr(
-        lag_df["index_value"]
-    )
-
-    st.metric(
-        f"מתאם עם ריבית בפיגור של {lag_months} חודשים",
-        (
-            f"{lag_corr:.2f}"
-            if pd.notna(lag_corr)
-            else "N/A"
-        )
     )
 
 
