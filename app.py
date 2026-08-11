@@ -3,26 +3,59 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# הגדרות בסיסיות
+# 1. הגדרות בסיסיות
 st.set_page_config(page_title="דאשבורד נדלן ישראל", page_icon="🏘️", layout="wide")
 
-# הזרקת CSS ליישור לימין (RTL)
+# 2. קוד CSS אגרסיבי ליישור מלא לימין (RTL) של כל רכיבי המערכת
 st.markdown("""
     <style>
-    /* הפיכת כל האפליקציה לימין-לשמאל */
+    /* כיווניות האתר לימין */
     .stApp {
         direction: rtl;
     }
-    /* יישור טקסטים, כותרות ותפריטים לימין */
-    div.stMarkdown, div.stText, div.stMetric {
+    
+    /* יישור כל כותרות הטקסט והפסקאות */
+    div[data-testid="stMarkdownContainer"] p,
+    div[data-testid="stMarkdownContainer"] h1,
+    div[data-testid="stMarkdownContainer"] h2,
+    div[data-testid="stMarkdownContainer"] h3,
+    div[data-testid="stMarkdownContainer"] h4 {
         text-align: right !important;
+        direction: rtl !important;
     }
-    .st-bb {
-        direction: rtl;
+    
+    /* יישור אזור המדדים (KPIs) */
+    div[data-testid="stMetricLabel"] *, 
+    div[data-testid="stMetricValue"] {
+        text-align: right !important;
+        direction: rtl !important;
+    }
+    
+    /* יישור תוויות בתפריט הצד (כפתורי רדיו וסליידרים) */
+    div[data-testid="stSidebar"] label,
+    div.stRadio > label,
+    div.stSlider > label {
+        text-align: right !important;
+        direction: rtl !important;
+        display: block;
+        width: 100%;
+    }
+    
+    /* יישור טקסט בתוך כפתורי הרדיו עצמם */
+    div[role="radiogroup"] label {
+        text-align: right !important;
+        direction: rtl !important;
+    }
+    
+    /* הפיכת הודעות מערכת (info, warning, success, error) */
+    div.stAlert {
+        direction: rtl !important;
+        text-align: right !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
+# 3. טעינת נתונים
 @st.cache_data
 def load_data():
     df = pd.read_csv('israel_housing_dashboard_data.csv')
@@ -31,11 +64,43 @@ def load_data():
 
 df = load_data()
 
+# 4. תפריט הניווט (חלוקה לדפים)
 st.sidebar.title("שלבי המצגת 📊")
 slide = st.sidebar.radio(
     "נווט בין המסכים:", 
-    ["1. רקע ושאלת פתיחה", "2. ניתוח אינטראקטיבי (הדאשבורד)", "3. מסקנות וסיכום"]
+    [
+        "1. רקע ושאלת פתיחה", 
+        "2. מאקרו: ריבית ואירועים", 
+        "3. פרדוקס הריבית (דיור)",
+        "4. השורה התחתונה: מדד המחירים",
+        "5. מסקנות וסיכום"
+    ]
 )
+
+# הוספת מסננים רק אם אנחנו באחד מדפי הניתוח
+if slide in ["2. מאקרו: ריבית ואירועים", "3. פרדוקס הריבית (דיור)", "4. השורה התחתונה: מדד המחירים"]:
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("מסננים לגרף 🎛️")
+    min_year = df['date'].dt.year.min()
+    max_year = df['date'].dt.year.max()
+    
+    selected_years = st.sidebar.slider(
+        "בחר טווח שנים:", 
+        min_value=min_year, 
+        max_value=max_year, 
+        value=(min_year, max_year)
+    )
+    
+    # סינון הנתונים
+    df_filtered = df[(df['date'].dt.year >= selected_years[0]) & (df['date'].dt.year <= selected_years[1])]
+    
+    # תצוגת נתונים מרכזיים בראש הדף
+    col1, col2, col3 = st.columns(3)
+    col1.metric("ממוצע ריבית לתקופה", f"{df_filtered['interest_rate'].mean():.2f}%")
+    col2.metric("שינוי שנתי מקסימלי (דיור)", f"{df_filtered['percentYear'].max()}%")
+    col3.metric("אירועי מאקרו בתקופה", df_filtered['event_name'].count())
+    st.markdown("---")
+
 
 # ==========================================
 # שקף 1: רקע
@@ -53,39 +118,15 @@ if slide == "1. רקע ושאלת פתיחה":
     st.success("👈 בואו נעבור לדאשבורד (בתפריט הצד) ונראה מה הנתונים מספרים לנו...")
 
 # ==========================================
-# שקף 2: הדאשבורד המרכזי (עם 3 הגרפים)
+# שקף 2: מאקרו - ריבית מול אירועים
 # ==========================================
-elif slide == "2. ניתוח אינטראקטיבי (הדאשבורד)":
-    st.title("חוקרים את הנתונים 🔍")
+elif slide == "2. מאקרו: ריבית ואירועים":
+    st.title("סביבת המאקרו 🌍")
+    st.markdown("#### ריבית בנק ישראל לאורך זמן ואירועים היסטוריים")
     
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("מסננים לגרף 🎛️")
-    min_year = df['date'].dt.year.min()
-    max_year = df['date'].dt.year.max()
-    
-    selected_years = st.sidebar.slider(
-        "בחר טווח שנים:", 
-        min_value=min_year, 
-        max_value=max_year, 
-        value=(min_year, max_year)
-    )
-    
-    df_filtered = df[(df['date'].dt.year >= selected_years[0]) & (df['date'].dt.year <= selected_years[1])]
-    
-    # KPI Cards
-    col1, col2, col3 = st.columns(3)
-    col1.metric("ממוצע ריבית לתקופה", f"{df_filtered['interest_rate'].mean():.2f}%")
-    col2.metric("שינוי שנתי מקסימלי (דיור)", f"{df_filtered['percentYear'].max()}%")
-    col3.metric("אירועי מאקרו בתקופה", df_filtered['event_name'].count())
-    
-    st.markdown("---")
-    
-    # גרף 1: מאקרו - ריבית מול אירועים
-    st.subheader("1. סביבת המאקרו: ריבית ואירועים היסטוריים")
     fig1 = px.line(df_filtered, x='date', y='interest_rate', labels={'date': 'תאריך', 'interest_rate': 'ריבית (%)'})
     fig1.update_traces(line_color='#1f77b4', name='ריבית בנק ישראל')
     
-    # הוספת האירועים כנקודות על הגרף
     events_df = df_filtered.dropna(subset=['event_name'])
     if not events_df.empty:
         fig1.add_trace(go.Scatter(
@@ -98,9 +139,14 @@ elif slide == "2. ניתוח אינטראקטיבי (הדאשבורד)":
             name='אירועי מאקרו'
         ))
     st.plotly_chart(fig1, use_container_width=True)
+
+# ==========================================
+# שקף 3: השוואת ריבית לשינוי במחירי דיור
+# ==========================================
+elif slide == "3. פרדוקס הריבית (דיור)":
+    st.title("פרדוקס הריבית 📈")
+    st.markdown("#### איך שינוי מחירי הדיור (YoY) מגיב להעלאות הריבית?")
     
-    # גרף 2: השוואת ריבית לשינוי במחירי דיור
-    st.subheader("2. פרדוקס הריבית: איך השוק מגיב?")
     fig2 = px.line(
         df_filtered, 
         x='date', 
@@ -111,16 +157,21 @@ elif slide == "2. ניתוח אינטראקטיבי (הדאשבורד)":
     fig2.for_each_trace(lambda t: t.update(name=newnames[t.name]))
     st.plotly_chart(fig2, use_container_width=True)
 
-    # גרף 3: מדד מחירי הדיור לאורך זמן
-    st.subheader("3. השורה התחתונה: מדד מחירי הדיור (ערך מוחלט)")
+# ==========================================
+# שקף 4: מדד מחירי הדיור (השורה התחתונה)
+# ==========================================
+elif slide == "4. השורה התחתונה: מדד המחירים":
+    st.title("השורה התחתונה 🏠")
+    st.markdown("#### מדד מחירי הדיור (ערך מוחלט לאורך זמן)")
+    
     fig3 = px.line(df_filtered, x='date', y='index_value', labels={'date': 'תאריך', 'index_value': 'נקודות מדד'})
-    fig3.update_traces(line_color='#2ca02c')
+    fig3.update_traces(line_color='#2ca02c', name='מדד מחירי הדיור')
     st.plotly_chart(fig3, use_container_width=True)
 
 # ==========================================
-# שקף 3: מסקנות
+# שקף 5: מסקנות וסיכום
 # ==========================================
-elif slide == "3. מסקנות וסיכום":
+elif slide == "5. מסקנות וסיכום":
     st.title("המסקנות שלנו 💡")
     
     st.error("**1. פרדוקס הריבית:** הריבית עלתה במקביל להשתוללות המחירים. השוק לא התקרר מיידית בעקבות העלאות הריבית.")
