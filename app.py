@@ -429,6 +429,9 @@ with tab_overview:
         .iloc[-1]
     )
 
+    # הוספת הערה קטנה עם החודש והשנה המעודכנים ביותר
+    st.caption(f"📅 נתונים מעודכנים נכון לחודש: {latest['date'].strftime('%m/%Y')}")
+
     c1, c2, c3, c4 = st.columns(4)
 
     with c1:
