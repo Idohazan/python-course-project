@@ -115,16 +115,6 @@ st.markdown(
         text-align: right;
     }
     
-    .etl-box {
-        padding: 20px;
-        border-radius: 15px;
-        background-color: #f9f9f9;
-        border: 1px solid #e0e0e0;
-        margin-bottom: 25px;
-        direction: rtl;
-        text-align: right;
-    }
-
     </style>
     """,
     unsafe_allow_html=True,
@@ -294,22 +284,6 @@ st.markdown(
         <p style="font-size: 13px; color: #666; margin-top: 15px; margin-bottom: 0;">
             <em>השתמשו בתפריט הצד (Sidebar) כדי לסנן נתונים ולמקד את הניתוח בתקופות זמן או קטגוריות ספציפיות.</em>
         </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- הצגת תהליך ה-ETL המשופר ---
-st.markdown(
-    """
-    <div class="etl-box">
-        <h3 style="margin-top: 0; color: #1f3bb3;">🔧 תהליך ה-ETL והכנת הנתונים</h3>
-        <ul style="line-height: 2;">
-            <li><strong>Extract:</strong> טעינת נתוני מחירי דיור, ריבית ואירועים ממקורות הנתונים.</li>
-            <li><strong>Transform:</strong> המרת תאריכים, טיפול בסוגי נתונים, ניקוי, מיון וסטנדרטיזציה.</li>
-            <li><strong>Feature Engineering:</strong> יצירת מדדים חדשים כגון שינוי שנתי, שינויי ריבית וסימון אירועים.</li>
-            <li><strong>Load, Analyze & Version Control:</strong> הטמעת ה-Dataset בדאשבורד וניהול גרסאות הקוד ב-GitHub.</li>
-        </ul>
     </div>
     """,
     unsafe_allow_html=True
